@@ -1,1 +1,0 @@
-# gl-andorid-course-project
