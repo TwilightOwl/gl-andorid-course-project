@@ -1,4 +1,4 @@
-package com.glandroidcourse.tanks.ui.games
+package com.glandroidcourse.tanks.presentation.games
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.glandroidcourse.tanks.R
-import com.glandroidcourse.tanks.ui.game.GameActivity
+import com.glandroidcourse.tanks.presentation.game.GameActivity
 
 class GamesListFragment: Fragment() {
     override fun onCreateView(

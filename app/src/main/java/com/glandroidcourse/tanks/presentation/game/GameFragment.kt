@@ -1,4 +1,4 @@
-package com.glandroidcourse.tanks.ui.game
+package com.glandroidcourse.tanks.presentation.game
 
 import android.os.Bundle
 import android.view.LayoutInflater

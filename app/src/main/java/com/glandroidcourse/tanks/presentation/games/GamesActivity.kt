@@ -1,10 +1,10 @@
-package com.glandroidcourse.tanks.ui.game
+package com.glandroidcourse.tanks.presentation.games
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.glandroidcourse.tanks.R
 
-class GameActivity : AppCompatActivity() {
+class GamesActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,7 +21,7 @@ class GameActivity : AppCompatActivity() {
         supportFragmentManager
             .beginTransaction()
             .add(R.id.container,
-                GameFragment()
+                GamesListFragment()
             )
             .commit()
     }

@@ -12,18 +12,18 @@
         android:theme="@style/AppTheme"
         tools:ignore="LockedOrientationActivity"
         >
-        <activity android:name=".ui.auth.AuthorizationActivity">
+        <activity android:name=".presentation.auth.AuthorizationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.games.GamesActivity"/>
+        <activity android:name=".presentation.games.GamesActivity"/>
         <activity
             android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden"
-            android:name=".ui.game.GameActivity"
+            android:name=".presentation.game.GameActivity"
             />
         <service android:name=".services.GameService" />
     </application>

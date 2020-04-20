@@ -1,19 +1,18 @@
-package com.glandroidcourse.tanks.ui.auth
+package com.glandroidcourse.tanks.presentation.game
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.glandroidcourse.tanks.R
-import com.glandroidcourse.tanks.ui.auth.AuthorizationFragment
 
-class AuthorizationActivity : AppCompatActivity() {
+class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_container)
-        showAuthorization()
+        showGamesList()
     }
 
-    fun showAuthorization() {
+    fun showGamesList() {
 
 //        val fragment: Fragment
 //        val backStack: String? = null
@@ -22,7 +21,7 @@ class AuthorizationActivity : AppCompatActivity() {
         supportFragmentManager
             .beginTransaction()
             .add(R.id.container,
-                AuthorizationFragment()
+                GameFragment()
             )
             .commit()
     }
