@@ -13,56 +13,39 @@ import androidx.fragment.app.Fragment
 import com.arellomobile.mvp.MvpAppCompatFragment
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.arellomobile.mvp.presenter.ProvidePresenter
-import com.glandroidcourse.tanks.App
 import com.glandroidcourse.tanks.R
-import com.glandroidcourse.tanks.base.ABaseFragment
 import com.glandroidcourse.tanks.base.BaseActivity
 import com.glandroidcourse.tanks.presentation.games.GamesActivity
-import kotlinx.android.synthetic.main.fragment_authorization.*
+import kotlinx.android.synthetic.main.fragment_registration.*
 import javax.inject.Inject
 
 
-class AuthorizationFragment: ABaseFragment(), IAuthorizationView {
+class RegistrationFragment: MvpAppCompatFragment(), IRegistrationView {
 
     @Inject
     @InjectPresenter
-    lateinit var presenter: AuthorizationPresenter
+    lateinit var presenter: RegistrationPresenter
 
-    @ProvidePresenter
-    fun providePresenter() = presenter
-
-    override fun inject() {
-        App.appComponent.inject(this)
-    }
-
-    override fun getViewId() = R.layout.fragment_authorization
+//    @ProvidePresenter
+//    fun providePresenter() = presenter
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val rootView: View = inflater.inflate(R.layout.fragment_authorization, container, false)
+        val rootView: View = inflater.inflate(R.layout.fragment_registration, container, false)
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        authButton.setOnClickListener(View.OnClickListener {
-//            // TODO: перенести старт активити в презентер
-//            val intent = Intent(activity, GamesActivity::class.java)
-//            startActivity(intent)
-            presenter.authorize(/*activity*/) // TODO: не хотелось бы передавать активити
-        })
-
         regButton.setOnClickListener(View.OnClickListener {
-            activity?.let {
-                if (it is IAuthorizationActivity) {
-                    it.showRegistration()
-                }
-            }
-
+            // TODO: перенести старт активити в презентер
+            val intent = Intent(activity, GamesActivity::class.java)
+            startActivity(intent)
+            presenter.authorize(/*activity*/) // TODO: не хотелось бы передавать активити
         })
 
         etLogin.setText(presenter.initialLogin)
@@ -87,6 +70,6 @@ class AuthorizationFragment: ABaseFragment(), IAuthorizationView {
     }
 
     override fun setAuthButtonEnabled(enabled: Boolean) {
-        authButton.isEnabled = enabled
+        regButton.isEnabled = enabled
     }
 }

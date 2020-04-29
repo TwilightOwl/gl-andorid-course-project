@@ -4,40 +4,26 @@ import android.app.Activity
 import android.content.Intent
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
-import com.glandroidcourse.tanks.base.SubRX
-import com.glandroidcourse.tanks.domain.repositories.UserRepository
 import com.glandroidcourse.tanks.presentation.games.GamesActivity
 import javax.inject.Inject
 
 @InjectViewState
-class AuthorizationPresenter : MvpPresenter<IAuthorizationView>{
+class RegistrationPresenter : MvpPresenter<IRegistrationView>{
 
     val initialLogin: String = ""
 
     private var currentLogin: String = initialLogin
 
-    @Inject
-    constructor()
-
-    @Inject
-    lateinit var userRepository: UserRepository
-
     fun authorize() {
-        userRepository.login(SubRX { _, e ->
-
-            if (e != null) {
-                e.printStackTrace()
-                viewState.setLoginError(e.localizedMessage)
-                return@SubRX
-            }
-
-            GamesActivity.show()
-
-        }, currentLogin, "stringg")
+        // playerRepository.authorize(login)
+        // viewState.setLoginError("Error message")
+//        val intent = Intent(activity, GamesActivity::class.java)
+//        startActivity(intent)
 
     }
 
-
+    @Inject
+    constructor()
 
     fun onLoginChange(login: String) {
         currentLogin = login

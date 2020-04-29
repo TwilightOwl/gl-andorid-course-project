@@ -50,16 +50,10 @@
             android:text="TextView" />
 
         <Button
-            android:id="@+id/authButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="Войти" />
-
-        <Button
             android:id="@+id/regButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Регистрация" />
+            android:enabled="false"
+            android:text="Зарегистрироваться" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
