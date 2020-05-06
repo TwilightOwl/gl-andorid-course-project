@@ -12,5 +12,5 @@ import javax.inject.Singleton
 ])
 interface AppComponent {
     fun inject(target: AuthorizationFragment)
-    //fun inject(target: RegistrationFragment)
+    fun inject(target: RegistrationFragment)
 }

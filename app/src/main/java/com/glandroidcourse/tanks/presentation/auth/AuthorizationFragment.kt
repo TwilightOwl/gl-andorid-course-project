@@ -50,10 +50,7 @@ class AuthorizationFragment: ABaseFragment(), IAuthorizationView {
         super.onViewCreated(view, savedInstanceState)
 
         authButton.setOnClickListener(View.OnClickListener {
-//            // TODO: перенести старт активити в презентер
-//            val intent = Intent(activity, GamesActivity::class.java)
-//            startActivity(intent)
-            presenter.authorize(/*activity*/) // TODO: не хотелось бы передавать активити
+            presenter.authorize()
         })
 
         regButton.setOnClickListener(View.OnClickListener {
@@ -62,14 +59,22 @@ class AuthorizationFragment: ABaseFragment(), IAuthorizationView {
                     it.showRegistration()
                 }
             }
-
         })
 
         etLogin.setText(presenter.initialLogin)
+        etPassword.setText("")
 
         etLogin.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 presenter.onLoginChange(s.toString())
+            }
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        })
+
+        etPassword.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.onPasswordChange(s.toString())
             }
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

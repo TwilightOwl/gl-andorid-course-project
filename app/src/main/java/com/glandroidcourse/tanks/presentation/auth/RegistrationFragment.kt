@@ -13,21 +13,29 @@ import androidx.fragment.app.Fragment
 import com.arellomobile.mvp.MvpAppCompatFragment
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.arellomobile.mvp.presenter.ProvidePresenter
+import com.glandroidcourse.tanks.App
 import com.glandroidcourse.tanks.R
+import com.glandroidcourse.tanks.base.ABaseFragment
 import com.glandroidcourse.tanks.base.BaseActivity
 import com.glandroidcourse.tanks.presentation.games.GamesActivity
 import kotlinx.android.synthetic.main.fragment_registration.*
 import javax.inject.Inject
 
 
-class RegistrationFragment: MvpAppCompatFragment(), IRegistrationView {
+class RegistrationFragment: ABaseFragment(), IRegistrationView {
 
     @Inject
     @InjectPresenter
     lateinit var presenter: RegistrationPresenter
 
-//    @ProvidePresenter
-//    fun providePresenter() = presenter
+    @ProvidePresenter
+    fun providePresenter() = presenter
+
+    override fun inject() {
+        App.appComponent.inject(this)
+    }
+
+    override fun getViewId() = R.layout.fragment_registration
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,13 +50,12 @@ class RegistrationFragment: MvpAppCompatFragment(), IRegistrationView {
         super.onViewCreated(view, savedInstanceState)
 
         regButton.setOnClickListener(View.OnClickListener {
-            // TODO: перенести старт активити в презентер
-            val intent = Intent(activity, GamesActivity::class.java)
-            startActivity(intent)
-            presenter.authorize(/*activity*/) // TODO: не хотелось бы передавать активити
+            presenter.register()
         })
 
-        etLogin.setText(presenter.initialLogin)
+        etLogin.setText("")
+        etPassword.setText("")
+        etPasswordConfirm.setText("")
 
         etLogin.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -57,19 +64,45 @@ class RegistrationFragment: MvpAppCompatFragment(), IRegistrationView {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
         })
+
+        etPassword.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.onPasswordChange(s.toString())
+            }
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        })
+
+        etPasswordConfirm.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.onPasswordConfirmChange(s.toString())
+            }
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        })
     }
 
     override fun setLoginError(message: String) {
-        tvError.visibility = View.VISIBLE
-        tvError.text = message
+        tvLoginError.visibility = View.VISIBLE
+        tvLoginError.text = message
     }
 
     override fun clearLoginError() {
-        tvError.visibility = View.GONE
-        tvError.text = ""
+        tvLoginError.visibility = View.GONE
+        tvLoginError.text = ""
     }
 
-    override fun setAuthButtonEnabled(enabled: Boolean) {
+    override fun setPasswordError(message: String) {
+        tvPasswordError.visibility = View.VISIBLE
+        tvPasswordError.text = message
+    }
+
+    override fun clearPasswordError() {
+        tvPasswordError.visibility = View.GONE
+        tvPasswordError.text = ""
+    }
+
+    override fun setRegButtonEnabled(enabled: Boolean) {
         regButton.isEnabled = enabled
     }
 }
