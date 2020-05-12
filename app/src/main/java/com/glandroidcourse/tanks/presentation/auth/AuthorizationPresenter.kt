@@ -12,7 +12,7 @@ import javax.inject.Inject
 @InjectViewState
 class AuthorizationPresenter : MvpPresenter<IAuthorizationView>{
 
-    val initialLogin: String = ""
+    val initialLogin: String = "superlogin"
 
     private var currentLogin: String = initialLogin
     private var currentPassword: String = ""

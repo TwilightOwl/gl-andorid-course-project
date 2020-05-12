@@ -62,6 +62,7 @@ class AuthorizationFragment: ABaseFragment(), IAuthorizationView {
         })
 
         etLogin.setText(presenter.initialLogin)
+        presenter.onLoginChange(presenter.initialLogin)
         etPassword.setText("")
 
         etLogin.addTextChangedListener(object : TextWatcher {

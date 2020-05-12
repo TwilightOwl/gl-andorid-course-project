@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.glandroidcourse.tanks.domain.di.components.AppComponent
 import com.glandroidcourse.tanks.domain.di.components.DaggerAppComponent
+import com.glandroidcourse.tanks.game.NetworkPlayer
 import io.realm.Realm
 import io.realm.RealmConfiguration
 
