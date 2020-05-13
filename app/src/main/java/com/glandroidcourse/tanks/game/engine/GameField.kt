@@ -7,7 +7,7 @@ fun getNextId() = id++
 
 interface IPlayer {
     val id: Int
-    val speed: Int
+    val speed: Float
     var life: Int
     fun hit(damage: Int)
     fun isDead(): Boolean
@@ -15,12 +15,20 @@ interface IPlayer {
 }
 
 class Player (override val id: Int) : IPlayer {
-    override val speed: Int = 1
+    override val speed: Float = 1f
     override var life: Int = 10
     override var weapon: BulletType = BulletType.SIMPLE
     // скорость не меняем!!!
     // если будет скорость выше 1, то пресечение будет расчитываться на несколько точек, но до стены может остаться например 1 точка
     // и тогда надо будет делать минимальный возможный шаг, это доп сложности в расчете положения объектов
+
+//    fun current(deltaTime: Int) {
+//        var deltaCurrentPosition = deltaTime * speed
+//        var currentPrecisePosition = (positionByDirection + deltaCurrentPosition + lastPositionError)
+//        var currentDiscretePosition = round(currentPrecisePosition)
+//        lastPositionError = currentPrecisePosition - currentDiscretePosition
+//        resultPosition = currentDiscretePosition
+//    }
 
     override fun hit(damage: Int) {
         life = max(0, life - damage)
@@ -116,8 +124,12 @@ class GameField {
 
     }
 
-    fun action(movableGameObjectId: Int, player: IPlayer, actions: List<Action>) {
+    fun processOtherObjects(deltaTime: Int) {
+        // TODO
+    }
 
+    fun action(player: IPlayer, actions: List<Action>, deltaTime: Int) {
+        val movableGameObjectId = player.id
         /* move action:
             hasToBeRotated
                 ? getRotatedPosition -> куда "выросли" габариты, там и проверяем на пересечение с объектами на поле
@@ -194,15 +206,28 @@ class GameField {
                             Direction.RIGHT -> Pair(Position::right, Position::left)
                         }
 
-                        val movedSubject = (subject.clone() as MovableGameObject).apply { move(direction, player.speed) }
+                        // val movedSubject = (subject.clone() as MovableGameObject).apply { move(direction, player.speed) }
+                        val trajectory = (subject.clone() as MovableGameObject).apply { getMoveTrajectory(direction, deltaTime, player.speed) }
                         val previousPosition = subjectEdge.getter.call(subject.position)
-                        val newPosition = subjectEdge.getter.call(movedSubject.position)
-                        val intersectedObjects = mapOfOrderedList[objectEdge]!!.findIntersections(movedSubject, previousPosition, newPosition)
+                        val newPosition = subjectEdge.getter.call(trajectory.position)
+                        val intersectedObjects = mapOfOrderedList[objectEdge]!!.findIntersections(trajectory, previousPosition, newPosition)
+
+                        Остановился здесь
+
+                        //TODO: находим ближайший (первый же) упор об стену или танк (EdgePosition), и двигаемся только до него (EdgePosition +/- 1)
                         val canBeMoved = intersectedObjects.none { it.type is Wall || it.type is Tank }
+                        //TODO: убрать это
                         if (!canBeMoved) return // т.к. speed всегда 1, то не может оказаться между стеной и текущей позицией других
                         // элементов (пулек например), и можно ничего не делать в данном случае
 
                         for (intersectedObject in intersectedObjects) {
+                            //TODO: если нашли ближайший упор, то получается что в траектории по которой искали пересечение
+                            // отбрасывается часть куда объект не дошел. Поэтому отбрасываем intersectedObject у которых позиция objectEdge
+                            // превышает (если Direction.RIGHT или Direction.UP, а если LEFT\DOWN - то меньше) позицию subjectEdge подвинутого объекта
+                            // (т.е. величину EdgePosition +/- 1)
+
+                            //TODO: intersectedObject попадаемые под требования (выше) и не являющиеся твердыми - взаимодействуют с объектом
+
                             /*
                              = - танк
                              0 - стена
