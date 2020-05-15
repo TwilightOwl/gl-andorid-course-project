@@ -3,31 +3,33 @@ package com.glandroidcourse.tanks.game.engine
 import java.lang.Math.round
 import kotlin.math.roundToInt
 
-interface IMovableGameObject : IGameObject {
+interface IMovableMapObject : IMapObject {
     // публична т.к. может понадобться пересоздать объект
     var lastStepError: Float
     var direction: Direction
-    fun getMoveTrajectory(direction: Direction, deltaTime: Int, speed: Float): IGameObject
+    fun getMoveTrajectory(direction: Direction, preciseStep: Float): IMapObject
     // используется когда сами указываем шаг, т.к. уперлись в стену, а по скорости должны были продвинуться дальше стены
     fun move(direction: Direction, step: Int)
     // используется в обычной ситуации, шаг расчитывается из скорости и пройденном времени, сохраняя в состоянии объекта ошибку округления шага, она учтется прислудующей итерации
-    fun move(direction: Direction, deltaTime: Int, speed: Float)
+    fun move(direction: Direction, preciseStep: Float)
     fun hasToBeRotated(direction: Direction): Boolean
     fun rotate(direction: Direction)
     fun getRotatedPosition(direction: Direction): Position
 }
 
-class MovableGameObject(
+class MovableMapObject(
     override val id: Int,
     override val type: BaseObjectType,
     override var position: Position,
     override var direction: Direction,
     override var lastStepError: Float = 0f
 
-) : GameObject(id, type, position), IMovableGameObject {
+) : MapObject(id, type, position), IMovableMapObject {
 
-    private fun getStep(deltaTime: Int, speed: Float): Pair<Int, Float> {
-        val currentPreciseStep = (deltaTime * speed + lastStepError)
+    // TODO: speed и deltaTime будут обрабатываться в объектах игры а не объекта поля.
+    //  Здесь надо принимать ВЕЩЕСТВЕННУЮ длину пути (шага) на текущей итерации, и сохранять здесь же ошибку
+    private fun getStep(preciseStep: Float): Pair<Int, Float> {
+        val currentPreciseStep = (preciseStep + lastStepError)
         val currentDiscreteStep = currentPreciseStep.roundToInt()
         // lastStepError = currentPreciseStep - currentDiscreteStep
         return Pair(currentDiscreteStep, currentPreciseStep - currentDiscreteStep)
@@ -43,9 +45,9 @@ class MovableGameObject(
         }
     }
 
-    override fun move(direction: Direction, deltaTime: Int, speed: Float) {
+    override fun move(direction: Direction, preciseStep: Float) {
         // нужно шаг расчитать исходя из deltaTime, сохранив новую lastStepError
-        val (step, stepError) = getStep(deltaTime, speed)
+        val (step, stepError) = getStep(preciseStep)
         lastStepError = stepError
         when (direction) {
             Direction.UP -> { position.top += step; position.bottom += step }
@@ -55,10 +57,10 @@ class MovableGameObject(
         }
     }
 
-    override fun getMoveTrajectory(direction: Direction, deltaTime: Int, speed: Float): IGameObject {
-        val (step, _) = getStep(deltaTime, speed)
+    override fun getMoveTrajectory(direction: Direction, preciseStep: Float): IMapObject {
+        val (step, _) = getStep(preciseStep)
         val (top, bottom, left, right) = position
-        return GameObject(id, type, when (direction) {
+        return MapObject(id, type, when (direction) {
             Direction.UP -> Position(top + step, bottom, left, right)
             Direction.DOWN -> Position(top, bottom - step, left, right)
             Direction.RIGHT -> Position(top, bottom, left, right + step)

@@ -24,24 +24,24 @@ enum class BulletType(val speed: Int, val damage: Int) {
     FAST(4, 1)
 }
 
-interface IGameObject {
+interface IMapObject {
     val id: Int
     val type: BaseObjectType
     var position: Position
-    fun intersectWith(anotherGameObject: IGameObject): Boolean
+    fun intersectWith(anotherMapObject: IMapObject): Boolean
 }
 
 data class Position(var top: Int, var bottom: Int, var left: Int, var right: Int)
 
-open class GameObject(override val id: Int, override val type: BaseObjectType, override var position: Position): IGameObject, Cloneable {
+open class MapObject(override val id: Int, override val type: BaseObjectType, override var position: Position): IMapObject, Cloneable {
 
-    override fun intersectWith(anotherGameObject: IGameObject): Boolean {
-        val (top, bottom, left, right) = anotherGameObject.position
+    override fun intersectWith(anotherMapObject: IMapObject): Boolean {
+        val (top, bottom, left, right) = anotherMapObject.position
 
-        //Position::bottom.getter.call(anotherGameObject.position)
+        //Position::bottom.getter.call(anotherMapObject.position)
         //val P: KProperty1<Position, Int> = Position::left
 
-        return position.top >= bottom && position.bottom <= top && position.right >= left && position.left <= right && id != anotherGameObject.id
+        return position.top >= bottom && position.bottom <= top && position.right >= left && position.left <= right && id != anotherMapObject.id
     }
 
     public override fun clone(): Any {

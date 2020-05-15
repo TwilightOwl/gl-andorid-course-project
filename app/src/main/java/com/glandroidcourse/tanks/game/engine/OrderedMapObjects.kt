@@ -5,18 +5,18 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.reflect.KProperty1
 
-class OrderedGameObjects(val orderedBy: KProperty1<Position, Int>) {
-    private var objects: MutableList<IGameObject> = mutableListOf(
-//        GameObject(1, Position(1,  0,0, 0)),
-//        GameObject(2, Position(5,  0,0, 0)),
-//        GameObject(3, Position(10,  0,0, 0)),
-//        GameObject(4, Position(15,  0,0, 0)),
-//        GameObject(5, Position(20,  0,0, 0))
+class OrderedMapObjects(val orderedBy: KProperty1<Position, Int>) {
+    private var objects: MutableList<IMapObject> = mutableListOf(
+//        MapObject(1, Position(1,  0,0, 0)),
+//        MapObject(2, Position(5,  0,0, 0)),
+//        MapObject(3, Position(10,  0,0, 0)),
+//        MapObject(4, Position(15,  0,0, 0)),
+//        MapObject(5, Position(20,  0,0, 0))
     )
 
     private val indexById = mutableMapOf<Int, Int>()
 
-    fun getObjectById(objectId: Int): IGameObject? {
+    fun getObjectById(objectId: Int): IMapObject? {
         return indexById[objectId]?.let { objects[it] }
     }
 
@@ -30,18 +30,18 @@ class OrderedGameObjects(val orderedBy: KProperty1<Position, Int>) {
         return result
     }
 
-    fun insert(gameObject: IGameObject): Int {
+    fun insert(mapObject: IMapObject): Int {
         // for (i in objects.in)
-        var foundIndex = objects.binarySearchBy(orderedBy.getter.call(gameObject.position)) { orderedBy.getter.call(it.position) }
+        var foundIndex = objects.binarySearchBy(orderedBy.getter.call(mapObject.position)) { orderedBy.getter.call(it.position) }
         if (foundIndex < 0) foundIndex = -(foundIndex + 1)
-        objects.add(foundIndex, gameObject)
-        indexById.put(gameObject.id, foundIndex)
+        objects.add(foundIndex, mapObject)
+        indexById.put(mapObject.id, foundIndex)
         return foundIndex
     }
 
     // left movement - left moving edge find right of other objects
     //
-    fun findIntersections(gameObject: IGameObject, previousPosition: Int, newPosition: Int): Array<IGameObject> {
+    fun findIntersections(mapObject: IMapObject, previousPosition: Int, newPosition: Int): Array<IMapObject> {
         /*
         this ordered is by right edges. object is moving to left. newPosition new left edge, prevPos - old left edge
 
@@ -59,10 +59,10 @@ class OrderedGameObjects(val orderedBy: KProperty1<Position, Int>) {
         if (foundIndex < 0) foundIndex = -(foundIndex + 1)
         var indicesToCheckIntersectionWith = getFoundIndices(foundIndex, max)
         if (newPosition < previousPosition) indicesToCheckIntersectionWith.reverse()
-        var result = arrayOf<IGameObject>()
+        var result = arrayOf<IMapObject>()
         for (index in indicesToCheckIntersectionWith) {
             try {
-                if (objects[index].intersectWith(gameObject)) {
+                if (objects[index].intersectWith(mapObject)) {
                     result += objects[index]
                 }
             } catch (error: Exception) {
@@ -72,7 +72,7 @@ class OrderedGameObjects(val orderedBy: KProperty1<Position, Int>) {
         return result
     }
 
-    fun remove(objectId: Int): IGameObject? {
+    fun remove(objectId: Int): IMapObject? {
         val index = indexById[objectId] ?: return null
         indexById.remove(objectId)
         return objects.removeAt(index)
