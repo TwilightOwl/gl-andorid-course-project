@@ -13,11 +13,11 @@ interface IGameObject {
 
 interface IDamageable : IGameObject {
     var life: Int
-    val onDeath: () -> Unit
-    fun damage(value: Int) {
+    val onDeath: (currentTime: Int) -> Unit
+    fun damage(value: Int, currentTime: Int) {
         life = max(0, life - value)
         if (isDead()) {
-            onDeath()
+            onDeath(currentTime)
         }
     }
     fun isDead(): Boolean {
@@ -25,33 +25,22 @@ interface IDamageable : IGameObject {
     }
 }
 
-//                    abstract class Damageable(
-//                        override val id: Int,
-//                        override var life: Int,
-//                        override val onDeath: (objectId: Int) -> Unit
-//                    ) : IDamageable {
-//
-//                        override fun damage(value: Int) {
-//                            life = max(0, life - value)
-//                            if (isDead()) {
-//                                onDeath(id)
-//                            }
-//                        }
-//
-//                        override fun isDead() = life <= 0
-//                    }
+
 
 interface IMoving : IGameObject {
     var availableSpeed: Float
     var speed: Float
     var direction: Direction
-    fun go(direction: Direction) {
+    fun go(direction: Direction, deltaTime: Int): Action {
         if (direction == this.direction) {
             this.speed = availableSpeed
-            !!!!!!!!!! MAP_ACTION(Motion)
+            // !!!!!!!!!! MAP_ACTION(Motion)
+            val step = deltaTime * this.speed
+            return Motion(direction, step)
         } else {
             stop()
             rotate(direction)
+            return Rotation(direction)
         }
     }
     fun stop() {
@@ -62,29 +51,13 @@ interface IMoving : IGameObject {
     }
 }
 
-//                    abstract class Moving(override val id: Int, override var speed: Float = 0f, override var direction: Direction) : IMoving {
-//                        override fun go(speed: Float) {
-//                            this.speed = speed
-//                        }
-//                        override fun stop() {
-//                            speed = 0f
-//                        }
-//                        override fun rotate(direction: Direction) {
-//                            this.direction = direction
-//                        }
-//                    }
+
 
 interface ICanHit : IGameObject {
     fun hit(objectId: Int, damage: Int)
 }
 
 
-//
-//
-//class P(override val id: Int, override var speed: Float = 0f, override var direction: Direction, override var life: Int,
-//        override val onDeath: () -> Unit) : IPlayer {
-//
-//}
 
 
 
@@ -95,17 +68,24 @@ interface IPlayer : IDamageable, IMoving {
     // fun hit(damage: Int)
     // fun isDead(): Boolean
     var weapon: BulletType
+    fun fire()
+    fun processMotion(currentTime: Int, deltaTime: Int, actions: List<Action>)
+    fun processInteraction(currentTime: Int, deltaTime: Int)
+    fun processFire(currentTime: Int, deltaTime: Int, actions: List<Action>)
+    fun processDeath(currentTime: Int)
 }
 
-class Player (override val id: Int) : IPlayer {
+class Player (
+    override val id: Int,
+    val doFire: (player: IPlayer, bulletType: BulletType) -> Unit,
+    val destroyMapObject: (player: IPlayer) -> Unit
+) : IPlayer {
     override var speed: Float = 1f
     override var direction = Direction.UP
     override var life: Int = 10
     override var weapon: BulletType = BulletType.SIMPLE
-
-    // скорость не меняем!!!
-    // если будет скорость выше 1, то пресечение будет расчитываться на несколько точек, но до стены может остаться например 1 точка
-    // и тогда надо будет делать минимальный возможный шаг, это доп сложности в расчете положения объектов
+    val corpsePeriod = 10
+    var deathTime: Int = 0
 
 //    fun current(deltaTime: Int) {
 //        var deltaCurrentPosition = deltaTime * speed
@@ -115,64 +95,90 @@ class Player (override val id: Int) : IPlayer {
 //        resultPosition = currentDiscretePosition
 //    }
 
-    override val onDeath: () -> Unit = {
-
+    override val onDeath: (currentTime: Int) -> Unit = {
+        deathTime = it
     }
 
-    override fun hit(damage: Int) {
-        life = max(0, life - damage)
-    }
-
-    override fun isDead() = life == 0
-}
-
-
-/* TODO: Надо хорошо подумать над этим:
-    в игре должны обрабатываться тики с какой-то внутренней частотой, типа fps
-    объектам задается скорость, исходя из внутренней частоты и реального времени вычислять текущее положение по скорости и
-    проецировать на дискретное игровое поле.
-    Тогда танки могут медленно ездить а пульки быстро.
-    Главное чтоб частота обработки была достаточно быстрой, чтобы никакой объект не смог шагнуть больше чем на одну координату,
-    иначе могут быть проблемы с вычислением пересечений объектов, типа пуля пролетает 5 точек, но до стены было 2, она не может за стену залететь.
-
-    Возможно стоит продумать лучше алгоритм пересечения, чем повышать чатсоту, а то тормозить будет на высокой частоте
-
-
- */
-interface IBulletObject {
-    val id: Int
-    val speed: Int
-    val damage: Int
-    val removeBulletObject: (bulletObjectId: Int) -> Unit
-    fun hit(objectId: Int): Boolean
-}
-
-class BulletObject(override val id: Int,
-                   override val speed: Int,
-                   override val damage: Int,
-                   override val removeBulletObject: (bulletObjectId: Int) -> Unit
-) : IBulletObject {
-    private var life = 1
-    private fun canHitThisObject(objectId: Int): Boolean = true
-
-    override fun hit(objectId: Int): Boolean {
-        // TODO: запоминаем в объекте пульки что поразили объект objectId, может быть полезно когда пуля сможет поражать больше одного объекта, тогда этот уже учли и больше на него удар не будет действовать от этой пули
-        if (canHitThisObject(objectId)) {
-            // урон самой пульке
-            hitItself(1)
-            return true
-        } else {
-            return false
+    override fun processDeath(currentTime: Int) {
+        if (currentTime - deathTime > corpsePeriod) {
+            destroyMapObject(this)
         }
     }
 
-    private fun hitItself(value: Int) {
-        life -= value
-        if (life <= 0) {
-            removeBulletObject(id)
+    override fun fire() {
+        if (isDead()) return
+        return doFire(this, weapon)
+    }
+
+
+    //TODO: переделать на один экшен? (если null то значит просто отсановиться), и возвращать или Motion или Rotate.
+    override fun processMotion(currentTime: Int, deltaTime: Int, actions: List<Action>) {
+        var motionActionExists = false
+        val mapActions = actions.map {
+            when (it) {
+                is Motion -> {
+                    motionActionExists = true
+                    if (isDead()) null else go(it.direction, deltaTime)
+                }
+                // Fire -> fire()
+                else -> null
+            }
+        }
+        if (!motionActionExists && !isDead()) {
+            // просто сбрасываем скорость текущую и не возвращаем никакого экшена
+            stop()
+        }
+    }
+
+    override fun processInteraction(currentTime: Int, deltaTime: Int) {
+
+    }
+
+    override fun processFire(currentTime: Int, deltaTime: Int, actions: List<Action>) {
+        val mapActions = actions.map {
+            when (it) {
+                Fire -> fire()
+                else -> null
+            }
         }
     }
 }
+
+
+                                                        interface IBulletObject {
+                                                            val id: Int
+                                                            val speed: Int
+                                                            val damage: Int
+                                                            val removeBulletObject: (bulletObjectId: Int) -> Unit
+                                                            fun hit(objectId: Int): Boolean
+                                                        }
+
+                                                        class BulletObject(override val id: Int,
+                                                                           override val speed: Int,
+                                                                           override val damage: Int,
+                                                                           override val removeBulletObject: (bulletObjectId: Int) -> Unit
+                                                        ) : IBulletObject {
+                                                            private var life = 1
+                                                            private fun canHitThisObject(objectId: Int): Boolean = true
+
+                                                            override fun hit(objectId: Int): Boolean {
+                                                                // TODO: запоминаем в объекте пульки что поразили объект objectId, может быть полезно когда пуля сможет поражать больше одного объекта, тогда этот уже учли и больше на него удар не будет действовать от этой пули
+                                                                if (canHitThisObject(objectId)) {
+                                                                    // урон самой пульке
+                                                                    hitItself(1)
+                                                                    return true
+                                                                } else {
+                                                                    return false
+                                                                }
+                                                            }
+
+                                                            private fun hitItself(value: Int) {
+                                                                life -= value
+                                                                if (life <= 0) {
+                                                                    removeBulletObject(id)
+                                                                }
+                                                            }
+                                                        }
 
 
 class GameField {
@@ -181,7 +187,8 @@ class GameField {
 //    val OrderedByLeft = OrderedMapObjects(Position::left)
 //    val OrderedByRight = OrderedMapObjects(Position::right)
 
-
+    val players = mutableListOf<IPlayer>()
+    val bullets = mutableListOf<IBullet>()
 
     val mapOfOrderedList = mapOf(
         Position::top to OrderedMapObjects(Position::top),
@@ -222,37 +229,111 @@ class GameField {
 //
 //    }
 
-    fun createBullet(player: IPlayer, mapObject: IMovableMapObject): IMovableMapObject {
-        val bulletType = player.weapon
-        val (top, bottom, left, right) = mapObject.position
+    fun initPlayers(count: Int): List<Int> {
+        val result = mutableListOf<Int>()
+        for (i in 1..count) {
+            val id = getNextId()
+            result.add(id)
+            players.add(
+                Player(
+                    id,
+                    doFire = {
+                            player, bulletType -> {
+                                val obj = getObjectById(id) as IMovableMapObject
+                                createBullet(player, obj)
+                            }
+                    },
+                    destroyMapObject = {
+                        removeMapObject(it.id)
+                    }
+                )
+            )
+            addMapObject()
+        }
+    }
 
-        val horizontalMiddle: Int = right - (right - left + 1) / 2
-        val verticalMiddle: Int = top - (top - bottom + 1) / 2
+    fun nextTick(currentTime: Int, deltaTime: Int, actionsByPlayer: Map<Int, List<Action>>) {
+        val players: List<IPlayer> = listOf<IPlayer>()
+        for (player in players) {
+            val actions = actionsByPlayer[player.id]!!
+            //TODO: переделать на один экшен, который null если нужно остановить танк
+            val action = player.processMotion(currentTime, deltaTime, actions)
+            doPlayerActionOnMap(......., action)
+            // interactions inside!!!
+        }
+//        for (player in players) {
+//            player.processInteracion(currentTime, deltaTime)
+//        }
+        for (player in players) {
+            val actions = actionsByPlayer[player.id]!!
+            // Просто насоздаем пулек, действий на карте не требуется пока
+            player.processFire(currentTime, deltaTime, actions)
+        }
 
-        val bullet: IMovableMapObject = MovableMapObject(
-            getNextId(),
-            Bullet(bulletType),
-            when (mapObject.direction) {
-                Direction.UP -> Position(top + 1, top + 1, horizontalMiddle, horizontalMiddle)
-                Direction.DOWN -> Position(bottom - 1, bottom - 1, horizontalMiddle, horizontalMiddle)
-                Direction.LEFT -> Position(verticalMiddle, verticalMiddle, left - 1, left - 1)
-                Direction.RIGHT -> Position(verticalMiddle, verticalMiddle, right + 1, right + 1)
-            },
-            mapObject.direction
+        //TODO: двигаем пульки
+        for (bullet in bullets) {
+            bullet.processMotion(currentTime, deltaTime)
+            //TODO: нужно действие на карте типа doBulletActionOnMap
+            1. цикл: ищем последовательные сталкновения траектории пули с предметами,
+                1.1 вызываем Bullet.interactWith(object)
+                1.2 вызываем Object.interactWith(bullet)
+                1.3 если пуля жива - продолжаем цикл, если нет - выходим. Для простоты будем давать жизнь всем пулям 1, но жизнь не уменьшается например при взаимодействии с бонусами
+                        пуле наносится урон, если она врезается в твердое
+        }
+
+        for (player in players) {
+            player.processDeath(currentTime)
+        }
+        for (bullet in bullets) {
+            bullet.processDeath()
+        }
+
+    }
+
+    fun addBullet(player: IPlayer) {
+        val playerMapObject: MovableMapObject = getObjectById(player.id) as MovableMapObject? ?: throw Exception("Doesn't exist")
+        bullets.add(
+            Bullet(
+                //TODO:
+            )
         )
-
-        return bullet
-
-        // DO NOT ADD BEFORE INTERSECTION CHECKS!!!
-        // addMapObject(bullet)
-
+        createBulletMapObject(playerMapObject, player.weapon)
     }
 
-        fun processOtherObjects(deltaTime: Int) {
-        // TODO
-    }
+                                            fun createBulletMapObject(mapObject: IMovableMapObject, bulletType: BulletType): IMovableMapObject {
 
-    fun action(player: IPlayer, actions: List<Action>, deltaTime: Int) {
+                                                val (top, bottom, left, right) = mapObject.position
+
+                                                val horizontalMiddle: Int = right - (right - left + 1) / 2
+                                                val verticalMiddle: Int = top - (top - bottom + 1) / 2
+
+                                                val bullet: IMovableMapObject = MovableMapObject(
+                                                    getNextId(),
+                                                    Bullet(bulletType),
+                                                    //TODO: учесть большой размер для мощных пуль
+                                                    when (mapObject.direction) {
+                                                        // Пуля пока находится в пределах танка. Дальше в рамках этого же игрового тика, пуля попробует двинуться с учетом скорости пули
+                                                        Direction.UP -> Position(top, top, horizontalMiddle, horizontalMiddle)
+                                                        Direction.DOWN -> Position(bottom, bottom, horizontalMiddle, horizontalMiddle)
+                                                        Direction.LEFT -> Position(verticalMiddle, verticalMiddle, left, left)
+                                                        Direction.RIGHT -> Position(verticalMiddle, verticalMiddle, right, right)
+                                                    },
+                                                    mapObject.direction
+                                                )
+
+                                                return bullet
+
+                                                // DO NOT ADD BEFORE INTERSECTION CHECKS!!!
+                                                // addMapObject(bullet)
+
+                                            }
+
+                                            fun processOtherObjects(deltaTime: Int) {
+                                                // TODO
+                                            }
+
+    //TODO: переделать на один экшен
+    fun doPlayerActionOnMap(player: IPlayer, actions: List<Action>, deltaTime: Int) {
         val movableMapObjectId = player.id
         /* move action:
             hasToBeRotated

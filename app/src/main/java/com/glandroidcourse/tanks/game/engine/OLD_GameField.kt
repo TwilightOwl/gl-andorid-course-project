@@ -12,7 +12,8 @@ import kotlin.math.min
 enum class Direction { UP, DOWN, LEFT, RIGHT }
 
 sealed class Action
-data class Motion(val direction: Direction) : Action()
+data class Motion(val direction: Direction, val step: Float) : Action()
+data class Rotation(val direction: Direction) : Action()
 object Fire : Action()
 
 /*

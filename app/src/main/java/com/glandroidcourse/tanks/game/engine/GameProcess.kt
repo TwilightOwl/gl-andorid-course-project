@@ -17,22 +17,24 @@ class GameProcess {
             val deltaTime = currentTime - lastTime
             lastTime = currentTime
 
+            val actionsByPlayer = mapOf<Int, List<Action>>()
+            field.nextTick(deltaTime, actionsByPlayer)
 
-            // 1. get current actions from players
-            val actions = listOf<Action>() // TODO
-            // 2. tick:
-                // - move players
-                for (player in players) {
-                    field.action(player, actions, deltaTime)
-                }
+                            // 1. get current actions from players
+                            val actions = listOf<Action>() // TODO
+                            // 2. tick:
+                                // - move players
+                                for (player in players) {
+                                    field.action(player, actions, deltaTime)
+                                }
 
-                // - move bullets
-                field.processOtherObjects(deltaTime)
+                                // - move bullets
+                                field.processOtherObjects(deltaTime)
 
-                // - update state of objects
+                                // - update state of objects
 
-            // 3. produce game state (with current frame index)
-            // if game state is game over => stop = true
+                            // 3. produce game state (with current frame index)
+                            // if game state is game over => stop = true
 
         }
     }
