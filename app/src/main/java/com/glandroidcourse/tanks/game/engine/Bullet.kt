@@ -19,10 +19,10 @@ class Bullet(
     override var speed = bulletType.speed
     override var power = bulletType.power
     override var life = 1
-    override val onDeath: (currentTime: Int) -> Unit = {
+    override val onDeath: (currentTime: Long) -> Unit = {
         removeBullet(this)
     }
-    override fun interactWith(interactableObject: IInteractable, currentTime: Int) {
+    override fun interactWith(interactableObject: IInteractable, currentTime: Long) {
         this.hit(interactableObject, currentTime)
     }
 }

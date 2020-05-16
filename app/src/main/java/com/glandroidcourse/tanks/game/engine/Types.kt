@@ -8,7 +8,7 @@ data class ControllerMotion(val direction: Direction) : ControllerAction()
 object ControllerFire : ControllerAction()
 
 abstract class Interactable : IInteractable {
-    abstract override fun interactWith(interactableObject: IInteractable, currentTime: Int)
+    abstract override fun interactWith(interactableObject: IInteractable, currentTime: Long)
 }
 
 interface IGameObject /*: IInteractable*/ {
@@ -58,8 +58,8 @@ interface ISolid : IGameObject
 
 interface IDamageable : IGameObject {
     var life: Int
-    val onDeath: (currentTime: Int) -> Unit
-    fun damage(value: Int, currentTime: Int) {
+    val onDeath: (currentTime: Long) -> Unit
+    fun damage(value: Int, currentTime: Long) {
         life = max(0, life - value)
         if (isDead()) {
             onDeath(currentTime)
@@ -74,7 +74,7 @@ interface IMoving : IGameObject {
     var availableSpeed: Float
     var speed: Float
     var direction: Direction
-    fun go(direction: Direction, deltaTime: Int): Action? {
+    fun go(direction: Direction, deltaTime: Long): Action? {
         if (this is IDamageable && this.isDead()) {
             return null
         }
@@ -103,7 +103,7 @@ interface IMoving : IGameObject {
 
 interface ICanHit : IGameObject {
     var power: Int
-    fun hit(gameObject: IInteractable, currentTime: Int) {
+    fun hit(gameObject: IInteractable, currentTime: Long) {
         val subjectIsDamageable = this is IDamageable
         val objectIsDamageable = gameObject is IDamageable
         val objectIsSolid = gameObject is ISolid

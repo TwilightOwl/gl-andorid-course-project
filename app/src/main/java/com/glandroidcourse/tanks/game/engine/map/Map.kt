@@ -106,7 +106,7 @@ class Map {
 
 
 
-    fun processTankMotion(tankMapObjectId: Int, action: Action, currentTime: Int) {
+    fun processTankMotion(tankMapObjectId: Int, action: Action, currentTime: Long) {
 
         val subject: MovableMapObject = getObjectById(tankMapObjectId) as MovableMapObject? ?: throw Exception("Doesn't exist")
 
@@ -214,12 +214,41 @@ class Map {
         }
     }
 
-    fun processBulletMotion(bulletMapObjectId: Int, action: Motion, currentTime: Int) {
-        //TODO: нужно действие на карте типа doBulletActionOnMap
-        1. цикл: ищем последовательные сталкновения траектории пули с предметами,
-        1.1 вызываем Bullet.interactWith(object)
-        1.2 вызываем Object.interactWith(bullet)
-        1.3 если пуля жива - продолжаем цикл, если нет - выходим. Для простоты будем давать жизнь всем пулям 1, но жизнь не уменьшается например при взаимодействии с бонусами
-        пуле наносится урон, если она врезается в твердое
+    fun processBulletMotion(bulletMapObjectId: Int, action: Motion, currentTime: Long) {
+        val subject: MovableMapObject = getObjectById(bulletMapObjectId) as MovableMapObject? ?: throw Exception("Doesn't exist")
+        val (direction, step) = action
+        val (subjectEdge, objectEdge) = when (direction) {
+            Direction.UP -> Pair(Position::top, Position::bottom)
+            Direction.DOWN -> Pair(Position::bottom, Position::top)
+            Direction.LEFT -> Pair(Position::left, Position::right)
+            Direction.RIGHT -> Pair(Position::right, Position::left)
+        }
+        val trajectory = subject.getMoveTrajectory(direction, step)
+        val previousPosition = subjectEdge.getter.call(subject.position)
+        val newPosition = subjectEdge.getter.call(trajectory.position)
+        val intersectedObjects = mapOfOrderedList[objectEdge]!!.findIntersections(trajectory, previousPosition, newPosition)
+        //TODO: находим ближайший (первый же) упор об стену или танк (nearestSolidObject), и двигаемся только до него (nearestSolidObject +/- 1)
+        var nearestSolidEdge: Int? = null
+        var stepToNearestSolidEdge: Int? = null
+//        1. цикл: ищем последовательные сталкновения траектории пули с предметами,
+//        1.1 вызываем Bullet.interactWith(object)
+//        1.2 вызываем Object.interactWith(bullet)
+//        1.3 если пуля жива - продолжаем цикл, если нет - выходим. Для простоты будем давать жизнь всем пулям 1, но жизнь не уменьшается например при взаимодействии с бонусами
+//        пуле наносится урон, если она врезается в твердое
+        for (intersectedObject in intersectedObjects) {
+            if (intersectedObject.type is WallObject || intersectedObject.type is TankObject) {
+                nearestSolidEdge = objectEdge.getter.call(intersectedObject.position)
+                stepToNearestSolidEdge = nearestSolidEdge - previousPosition
+                subject.move(direction, abs(stepToNearestSolidEdge))
+                updateMapObject(bulletMapObjectId)
+                subject.gameObject.interactWith(intersectedObject.gameObject, currentTime)
+                intersectedObject.gameObject.interactWith(subject.gameObject, currentTime)
+                break
+            }
+        }
+        if (nearestSolidEdge == null) {
+            subject.move(direction, step)
+            updateMapObject(bulletMapObjectId)
+        }
     }
 }

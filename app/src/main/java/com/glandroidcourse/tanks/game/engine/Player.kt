@@ -7,10 +7,10 @@ interface IPlayer : IDamageable, IMoving, ISolid, IInteractable {
     val doFire: (player: IPlayer) -> Unit
     val removePlayer: (player: IPlayer) -> Unit
     fun fire()
-    fun processMotion(currentTime: Int, deltaTime: Int, motionAction: ControllerMotion?): Action?
-    fun processInteraction(currentTime: Int, deltaTime: Int)
+    fun processMotion(currentTime: Long, deltaTime: Long, motionAction: ControllerMotion?): Action?
+    fun processInteraction(currentTime: Long, deltaTime: Long)
     //fun processFire(currentTime: Int, deltaTime: Int, fireAction: ControllerFire)
-    fun processDeath(currentTime: Int)
+    fun processDeath(currentTime: Long)
 }
 
 class Player (
@@ -24,12 +24,12 @@ class Player (
     override var weapon: BulletType = BulletType.SIMPLE
     override var life: Int = 10
     val corpsePeriod = 10
-    var deathTime: Int = 0
-    override val onDeath: (currentTime: Int) -> Unit = {
+    var deathTime: Long = 0
+    override val onDeath: (currentTime: Long) -> Unit = {
         deathTime = it
     }
 
-    override fun processDeath(currentTime: Int) {
+    override fun processDeath(currentTime: Long) {
         if (currentTime - deathTime > corpsePeriod) {
             removePlayer(this)
         }
@@ -40,7 +40,7 @@ class Player (
         return doFire(this)
     }
 
-    override fun processMotion(currentTime: Int, deltaTime: Int, motionAction: ControllerMotion?): Action? {
+    override fun processMotion(currentTime: Long, deltaTime: Long, motionAction: ControllerMotion?): Action? {
         if (isDead()) return null
         return if (motionAction == null) {
             stop()
@@ -50,7 +50,7 @@ class Player (
         }
     }
 
-    override fun processInteraction(currentTime: Int, deltaTime: Int) {
+    override fun processInteraction(currentTime: Long, deltaTime: Long) {
 
     }
 
@@ -58,7 +58,7 @@ class Player (
 //        fire()
 //    }
 
-    override fun interactWith(gameObject: IInteractable, currentTime: Int) {
+    override fun interactWith(gameObject: IInteractable, currentTime: Long) {
         // only bonus can interact with player
     }
 }

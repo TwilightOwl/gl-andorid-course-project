@@ -51,5 +51,5 @@ data class Rotation(val direction: Direction) : Action()
 object Fire : Action()
 
 interface IInteractable {
-    fun interactWith(interactableObject: IInteractable, currentTime: Int)
+    fun interactWith(interactableObject: IInteractable, currentTime: Long)
 }
