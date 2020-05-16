@@ -1,9 +1,13 @@
 package com.glandroidcourse.tanks.game.engine
 
-import java.lang.Math.round
+import com.glandroidcourse.tanks.game.engine.map.BaseObjectType
+import com.glandroidcourse.tanks.game.engine.map.IMapObject
+import com.glandroidcourse.tanks.game.engine.map.MapObject
+import com.glandroidcourse.tanks.game.engine.map.Position
 import kotlin.math.roundToInt
 
-interface IMovableMapObject : IMapObject {
+interface IMovableMapObject :
+    IMapObject {
     // публична т.к. может понадобться пересоздать объект
     var lastStepError: Float
     var direction: Direction
@@ -60,12 +64,34 @@ class MovableMapObject(
     override fun getMoveTrajectory(direction: Direction, preciseStep: Float): IMapObject {
         val (step, _) = getStep(preciseStep)
         val (top, bottom, left, right) = position
-        return MapObject(id, type, when (direction) {
-            Direction.UP -> Position(top + step, bottom, left, right)
-            Direction.DOWN -> Position(top, bottom - step, left, right)
-            Direction.RIGHT -> Position(top, bottom, left, right + step)
-            Direction.LEFT -> Position(top, bottom, left - step, right)
-        })
+        return MapObject(
+            id, type, when (direction) {
+                Direction.UP -> Position(
+                    top + step,
+                    bottom,
+                    left,
+                    right
+                )
+                Direction.DOWN -> Position(
+                    top,
+                    bottom - step,
+                    left,
+                    right
+                )
+                Direction.RIGHT -> Position(
+                    top,
+                    bottom,
+                    left,
+                    right + step
+                )
+                Direction.LEFT -> Position(
+                    top,
+                    bottom,
+                    left - step,
+                    right
+                )
+            }
+        )
     }
 
     override fun rotate(direction: Direction) {
@@ -85,23 +111,63 @@ class MovableMapObject(
         val height = top - bottom
         return when (this.direction) {
             Direction.UP -> when (direction) {
-                Direction.RIGHT -> Position(top = top, left = left, bottom = top - width, right = left + height)
-                Direction.LEFT -> Position(top = top, right = right, bottom = top - width, left = right - height)
+                Direction.RIGHT -> Position(
+                    top = top,
+                    left = left,
+                    bottom = top - width,
+                    right = left + height
+                )
+                Direction.LEFT -> Position(
+                    top = top,
+                    right = right,
+                    bottom = top - width,
+                    left = right - height
+                )
                 else -> position
             }
             Direction.DOWN -> when (direction) {
-                Direction.RIGHT -> Position(bottom = bottom, left = left, top = bottom + width, right = left + height)
-                Direction.LEFT -> Position(bottom = bottom, right = right, top = bottom + width, left = right - height)
+                Direction.RIGHT -> Position(
+                    bottom = bottom,
+                    left = left,
+                    top = bottom + width,
+                    right = left + height
+                )
+                Direction.LEFT -> Position(
+                    bottom = bottom,
+                    right = right,
+                    top = bottom + width,
+                    left = right - height
+                )
                 else -> position
             }
             Direction.RIGHT -> when (direction) {
-                Direction.UP -> Position(bottom = bottom, right = right, top = bottom + width, left = right - height)
-                Direction.DOWN -> Position(top = top, right = right, bottom = top - width, left = right - height)
+                Direction.UP -> Position(
+                    bottom = bottom,
+                    right = right,
+                    top = bottom + width,
+                    left = right - height
+                )
+                Direction.DOWN -> Position(
+                    top = top,
+                    right = right,
+                    bottom = top - width,
+                    left = right - height
+                )
                 else -> position
             }
             Direction.LEFT -> when (direction) {
-                Direction.UP -> Position(bottom = bottom, left = left, top = bottom + width, right = left + height)
-                Direction.DOWN -> Position(top = top, left = left, bottom = top - width, right = left + height)
+                Direction.UP -> Position(
+                    bottom = bottom,
+                    left = left,
+                    top = bottom + width,
+                    right = left + height
+                )
+                Direction.DOWN -> Position(
+                    top = top,
+                    left = left,
+                    bottom = top - width,
+                    right = left + height
+                )
                 else -> position
             }
         }

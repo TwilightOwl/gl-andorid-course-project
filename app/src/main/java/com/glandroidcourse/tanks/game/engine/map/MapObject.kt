@@ -5,9 +5,9 @@ import kotlin.reflect.KProperty1
 
 
 sealed class BaseObjectType
-data class Tank(val tankId: Int) : BaseObjectType()
-data class Bullet(val bulletType: BulletType) : BaseObjectType()
-data class Wall(val wallType: WallType) : BaseObjectType()
+data class TankObject(val tankId: Int) : BaseObjectType()
+data class BulletObject(val bulletType: BulletType) : BaseObjectType()
+data class WallObject(val wallType: WallType) : BaseObjectType()
 // data class Bonus(val type: BonusType) : BaseObject()
 
 enum class WallType(val solidity: Int) {

@@ -1,5 +1,6 @@
 package com.glandroidcourse.tanks.game.engine
 
+import com.glandroidcourse.tanks.game.engine.map.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.sign
@@ -7,278 +8,83 @@ import kotlin.math.sign
 var id = 0
 fun getNextId() = id++
 
-interface IGameObject {
-    val id: Int
-}
-
-interface IDamageable : IGameObject {
-    var life: Int
-    val onDeath: (currentTime: Int) -> Unit
-    fun damage(value: Int, currentTime: Int) {
-        life = max(0, life - value)
-        if (isDead()) {
-            onDeath(currentTime)
-        }
-    }
-    fun isDead(): Boolean {
-        return life <= 0
-    }
-}
-
-
-
-interface IMoving : IGameObject {
-    var availableSpeed: Float
-    var speed: Float
-    var direction: Direction
-    fun go(direction: Direction, deltaTime: Int): Action {
-        if (direction == this.direction) {
-            this.speed = availableSpeed
-            // !!!!!!!!!! MAP_ACTION(Motion)
-            val step = deltaTime * this.speed
-            return Motion(direction, step)
-        } else {
-            stop()
-            rotate(direction)
-            return Rotation(direction)
-        }
-    }
-    fun stop() {
-        speed = 0f
-    }
-    private fun rotate(direction: Direction) {
-        this.direction = direction
-    }
-}
-
-
-
-interface ICanHit : IGameObject {
-    fun hit(objectId: Int, damage: Int)
-}
-
-
-
-
-
-interface IPlayer : IDamageable, IMoving {
-    // val id: Int
-    // val speed: Float
-    // var life: Int
-    // fun hit(damage: Int)
-    // fun isDead(): Boolean
-    var weapon: BulletType
-    fun fire()
-    fun processMotion(currentTime: Int, deltaTime: Int, actions: List<Action>)
-    fun processInteraction(currentTime: Int, deltaTime: Int)
-    fun processFire(currentTime: Int, deltaTime: Int, actions: List<Action>)
-    fun processDeath(currentTime: Int)
-}
-
-class Player (
-    override val id: Int,
-    val doFire: (player: IPlayer, bulletType: BulletType) -> Unit,
-    val destroyMapObject: (player: IPlayer) -> Unit
-) : IPlayer {
-    override var speed: Float = 1f
-    override var direction = Direction.UP
-    override var life: Int = 10
-    override var weapon: BulletType = BulletType.SIMPLE
-    val corpsePeriod = 10
-    var deathTime: Int = 0
-
-//    fun current(deltaTime: Int) {
-//        var deltaCurrentPosition = deltaTime * speed
-//        var currentPrecisePosition = (positionByDirection + deltaCurrentPosition + lastPositionError)
-//        var currentDiscretePosition = round(currentPrecisePosition)
-//        lastPositionError = currentPrecisePosition - currentDiscretePosition
-//        resultPosition = currentDiscretePosition
-//    }
-
-    override val onDeath: (currentTime: Int) -> Unit = {
-        deathTime = it
-    }
-
-    override fun processDeath(currentTime: Int) {
-        if (currentTime - deathTime > corpsePeriod) {
-            destroyMapObject(this)
-        }
-    }
-
-    override fun fire() {
-        if (isDead()) return
-        return doFire(this, weapon)
-    }
-
-
-    //TODO: переделать на один экшен? (если null то значит просто отсановиться), и возвращать или Motion или Rotate.
-    override fun processMotion(currentTime: Int, deltaTime: Int, actions: List<Action>) {
-        var motionActionExists = false
-        val mapActions = actions.map {
-            when (it) {
-                is Motion -> {
-                    motionActionExists = true
-                    if (isDead()) null else go(it.direction, deltaTime)
-                }
-                // Fire -> fire()
-                else -> null
-            }
-        }
-        if (!motionActionExists && !isDead()) {
-            // просто сбрасываем скорость текущую и не возвращаем никакого экшена
-            stop()
-        }
-    }
-
-    override fun processInteraction(currentTime: Int, deltaTime: Int) {
-
-    }
-
-    override fun processFire(currentTime: Int, deltaTime: Int, actions: List<Action>) {
-        val mapActions = actions.map {
-            when (it) {
-                Fire -> fire()
-                else -> null
-            }
-        }
-    }
-}
-
-
-                                                        interface IBulletObject {
-                                                            val id: Int
-                                                            val speed: Int
-                                                            val damage: Int
-                                                            val removeBulletObject: (bulletObjectId: Int) -> Unit
-                                                            fun hit(objectId: Int): Boolean
-                                                        }
-
-                                                        class BulletObject(override val id: Int,
-                                                                           override val speed: Int,
-                                                                           override val damage: Int,
-                                                                           override val removeBulletObject: (bulletObjectId: Int) -> Unit
-                                                        ) : IBulletObject {
-                                                            private var life = 1
-                                                            private fun canHitThisObject(objectId: Int): Boolean = true
-
-                                                            override fun hit(objectId: Int): Boolean {
-                                                                // TODO: запоминаем в объекте пульки что поразили объект objectId, может быть полезно когда пуля сможет поражать больше одного объекта, тогда этот уже учли и больше на него удар не будет действовать от этой пули
-                                                                if (canHitThisObject(objectId)) {
-                                                                    // урон самой пульке
-                                                                    hitItself(1)
-                                                                    return true
-                                                                } else {
-                                                                    return false
-                                                                }
-                                                            }
-
-                                                            private fun hitItself(value: Int) {
-                                                                life -= value
-                                                                if (life <= 0) {
-                                                                    removeBulletObject(id)
-                                                                }
-                                                            }
-                                                        }
-
 
 class GameField {
-//    val OrderedByTop = OrderedMapObjects(Position::top)
-//    val OrderedByBottom = OrderedMapObjects(Position::bottom)
-//    val OrderedByLeft = OrderedMapObjects(Position::left)
-//    val OrderedByRight = OrderedMapObjects(Position::right)
 
     val players = mutableListOf<IPlayer>()
     val bullets = mutableListOf<IBullet>()
+    val map = Map()
 
-    val mapOfOrderedList = mapOf(
-        Position::top to OrderedMapObjects(Position::top),
-        Position::bottom to OrderedMapObjects(Position::bottom),
-        Position::left to OrderedMapObjects(Position::left),
-        Position::right to OrderedMapObjects(Position::right)
-    )
-
-    fun getObjectById(objectId: Int): IMapObject? {
-        return mapOfOrderedList[Position::top]!!.getObjectById(objectId)
-    }
-
-    fun addMapObject(mapObject: IMapObject) {
-        //TODO
-//        OrderedByTop.insert(mapObject)
-//        OrderedByBottom.insert(mapObject)
-//        OrderedByLeft.insert(mapObject)
-//        OrderedByRight.insert(mapObject)
-    }
-
-    fun removeMapObject(mapObjectId: Int) {
-        //TODO
-//        OrderedByTop.remove(mapObjectId)
-//        OrderedByBottom.remove(mapObjectId)
-//        OrderedByLeft.remove(mapObjectId)
-//        OrderedByRight.remove(mapObjectId)
-    }
-
-    fun updateMapObject(mapObjectId: Int) {
-        //TODO
-//        OrderedByTop.update(mapObjectId)
-//        OrderedByBottom.update(mapObjectId)
-//        OrderedByLeft.update(mapObjectId)
-//        OrderedByRight.update(mapObjectId)
-    }
-
-//    fun addTank(id: Int) {
-//
-//    }
 
     fun initPlayers(count: Int): List<Int> {
-        val result = mutableListOf<Int>()
-        for (i in 1..count) {
-            val id = getNextId()
-            result.add(id)
-            players.add(
-                Player(
-                    id,
-                    doFire = {
-                            player, bulletType -> {
-                                val obj = getObjectById(id) as IMovableMapObject
-                                createBullet(player, obj)
-                            }
-                    },
-                    destroyMapObject = {
-                        removeMapObject(it.id)
-                    }
-                )
-            )
-            addMapObject()
-        }
+        return List(count) { addPlayer(it.toString()).id }
     }
 
-    fun nextTick(currentTime: Int, deltaTime: Int, actionsByPlayer: Map<Int, List<Action>>) {
-        val players: List<IPlayer> = listOf<IPlayer>()
-        for (player in players) {
-            val actions = actionsByPlayer[player.id]!!
-            //TODO: переделать на один экшен, который null если нужно остановить танк
-            val action = player.processMotion(currentTime, deltaTime, actions)
-            doPlayerActionOnMap(......., action)
-            // interactions inside!!!
+    private fun addPlayer(name: String): IPlayer {
+        val id = getNextId()
+        fun removePlayer(player: IPlayer) {
+            map.removeMapObject(player.id)
+            players.remove(player)
         }
-//        for (player in players) {
-//            player.processInteracion(currentTime, deltaTime)
-//        }
-        for (player in players) {
-            val actions = actionsByPlayer[player.id]!!
-            // Просто насоздаем пулек, действий на карте не требуется пока
-            player.processFire(currentTime, deltaTime, actions)
-        }
+        val player = Player(
+            id,
+            doFire = { addBullet(it) },
+            removePlayer = { removePlayer(it) }
+        )
+        map.createTankMapObject(id, name, player)
+        return player
+    }
 
+    private fun addBullet(player: IPlayer): IBullet {
+        val tankMapObject: MovableMapObject = map.getObjectById(player.id) as MovableMapObject? ?: throw Exception("Doesn't exist")
+        fun removeBullet(bullet: IBullet) {
+            map.removeMapObject(bullet.id)
+            bullets.remove(bullet)
+        }
+        val id = getNextId()
+        val bullet = Bullet(
+            id,
+            player.weapon,
+            player.direction,
+            removeBullet = { removeBullet(it) }
+        )
+        bullets.add(bullet)
+        map.createBulletMapObject(id, player.weapon, bullet, tankMapObject)
+        return bullet
+    }
+
+
+
+
+
+
+
+    fun nextGameTick(currentTime: Int, deltaTime: Int, actionsByPlayer: Map<Int, List<ControllerAction>>) {
+        val players: List<IPlayer> = listOf<IPlayer>()
+
+        for (player in players) {
+            val actions = actionsByPlayer[player.id]!!
+            val motionAction: ControllerMotion? = actions.find { it is ControllerMotion } as ControllerMotion
+            val mapAction: Action? = player.processMotion(currentTime, deltaTime, motionAction)
+            if (mapAction != null) {
+                // interactions inside!!!
+                map.processTankMotion(player.id, mapAction, currentTime)
+            }
+        }
+        for (player in players) {
+            val actions = actionsByPlayer[player.id]!!
+            val fireAction: ControllerFire? = actions.find { it is ControllerFire } as ControllerFire
+            if (fireAction != null) {
+                // Просто насоздаем пулек, действий на карте не требуется пока
+                player.fire()
+            }
+        }
         //TODO: двигаем пульки
         for (bullet in bullets) {
-            bullet.processMotion(currentTime, deltaTime)
-            //TODO: нужно действие на карте типа doBulletActionOnMap
-            1. цикл: ищем последовательные сталкновения траектории пули с предметами,
-                1.1 вызываем Bullet.interactWith(object)
-                1.2 вызываем Object.interactWith(bullet)
-                1.3 если пуля жива - продолжаем цикл, если нет - выходим. Для простоты будем давать жизнь всем пулям 1, но жизнь не уменьшается например при взаимодействии с бонусами
-                        пуле наносится урон, если она врезается в твердое
+            val action: Action? = bullet.go(bullet.direction, deltaTime)
+            if (action != null && action is Motion) {
+                map.processBulletMotion(bullet.id, action, currentTime)
+            }
         }
 
         for (player in players) {
@@ -290,43 +96,6 @@ class GameField {
 
     }
 
-    fun addBullet(player: IPlayer) {
-        val playerMapObject: MovableMapObject = getObjectById(player.id) as MovableMapObject? ?: throw Exception("Doesn't exist")
-        bullets.add(
-            Bullet(
-                //TODO:
-            )
-        )
-        createBulletMapObject(playerMapObject, player.weapon)
-    }
-
-                                            fun createBulletMapObject(mapObject: IMovableMapObject, bulletType: BulletType): IMovableMapObject {
-
-                                                val (top, bottom, left, right) = mapObject.position
-
-                                                val horizontalMiddle: Int = right - (right - left + 1) / 2
-                                                val verticalMiddle: Int = top - (top - bottom + 1) / 2
-
-                                                val bullet: IMovableMapObject = MovableMapObject(
-                                                    getNextId(),
-                                                    Bullet(bulletType),
-                                                    //TODO: учесть большой размер для мощных пуль
-                                                    when (mapObject.direction) {
-                                                        // Пуля пока находится в пределах танка. Дальше в рамках этого же игрового тика, пуля попробует двинуться с учетом скорости пули
-                                                        Direction.UP -> Position(top, top, horizontalMiddle, horizontalMiddle)
-                                                        Direction.DOWN -> Position(bottom, bottom, horizontalMiddle, horizontalMiddle)
-                                                        Direction.LEFT -> Position(verticalMiddle, verticalMiddle, left, left)
-                                                        Direction.RIGHT -> Position(verticalMiddle, verticalMiddle, right, right)
-                                                    },
-                                                    mapObject.direction
-                                                )
-
-                                                return bullet
-
-                                                // DO NOT ADD BEFORE INTERSECTION CHECKS!!!
-                                                // addMapObject(bullet)
-
-                                            }
 
                                             fun processOtherObjects(deltaTime: Int) {
                                                 // TODO
@@ -379,7 +148,7 @@ class GameField {
                                     будет повернут, и т.к. размеры увеличатся по одному направлению, то можно приравнять к
                                      движению в этом направлении -> сдедует проверить столкновение с мягкими штуками как при обычном движении
                                  */
-                                if (intersectedObject.type is Wall || intersectedObject.type is Tank) {
+                                if (intersectedObject.type is WallObject || intersectedObject.type is TankObject) {
                                     return@let Pair(false, null)
                                 }
                             }
@@ -424,7 +193,7 @@ class GameField {
                         var nearestSolidEdge: Int? = null
                         var step: Int? = null
                         for (intersectedObject in intersectedObjects) {
-                            if (intersectedObject.type is Wall || intersectedObject.type is Tank) {
+                            if (intersectedObject.type is WallObject || intersectedObject.type is TankObject) {
                                 nearestSolidEdge = objectEdge.getter.call(intersectedObject.position)
                                 step = nearestSolidEdge - previousPosition
                                 subject.move(direction, abs(step))
@@ -450,10 +219,10 @@ class GameField {
                             }
 
                             //TODO: intersectedObject попадаемые под требования (выше) и не являющиеся твердыми - взаимодействуют с объектом
-                            if (intersectedObject.type is Bullet) {
+                            if (intersectedObject.type is BulletObject) {
                                 // можно наткнуться на две пули сразу, при этом первая уже может убить, но столкновение со второй
                                 // тоже засчитываем, и удаляться обе пули. Потом уже танк будет помечен дохлым
-                                player.hit((intersectedObject.type as Bullet).bulletType.damage)
+                                player.hit((intersectedObject.type as BulletObject).bulletType.damage)
                                 removeMapObject(intersectedObject.id)
 
                                 // TODO:
@@ -496,7 +265,11 @@ class GameField {
                 }
                 Fire -> {
                     val bullet = createBullet(player, subject)
-                    BulletObject(bullet.id) { removeMapObject(it) }
+                    BulletObject(bullet.id) {
+                        removeMapObject(
+                            it
+                        )
+                    }
                     addMapObject(bullet)
                     /*
                     Лучше создать пульку в общем массиве объектов
