@@ -1,9 +1,5 @@
-package com.glandroidcourse.tanks.game.engine
+package com.glandroidcourse.tanks.game.engine.map
 
-import com.glandroidcourse.tanks.game.engine.map.BaseObjectType
-import com.glandroidcourse.tanks.game.engine.map.IMapObject
-import com.glandroidcourse.tanks.game.engine.map.MapObject
-import com.glandroidcourse.tanks.game.engine.map.Position
 import kotlin.math.roundToInt
 
 interface IMovableMapObject :
@@ -23,12 +19,14 @@ interface IMovableMapObject :
 
 class MovableMapObject(
     override val id: Int,
+    override val gameObject: IInteractable,
     override val type: BaseObjectType,
     override var position: Position,
     override var direction: Direction,
     override var lastStepError: Float = 0f
 
-) : MapObject(id, type, position), IMovableMapObject {
+) : MapObject(id, gameObject, type, position),
+    IMovableMapObject {
 
     // TODO: speed и deltaTime будут обрабатываться в объектах игры а не объекта поля.
     //  Здесь надо принимать ВЕЩЕСТВЕННУЮ длину пути (шага) на текущей итерации, и сохранять здесь же ошибку
@@ -65,7 +63,7 @@ class MovableMapObject(
         val (step, _) = getStep(preciseStep)
         val (top, bottom, left, right) = position
         return MapObject(
-            id, type, when (direction) {
+            id, gameObject, type, when (direction) {
                 Direction.UP -> Position(
                     top + step,
                     bottom,
