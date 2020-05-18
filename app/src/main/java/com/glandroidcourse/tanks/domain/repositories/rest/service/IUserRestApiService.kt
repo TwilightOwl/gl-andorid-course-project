@@ -4,10 +4,7 @@ import com.glandroidcourse.tanks.domain.repositories.models.rest.Token
 import com.glandroidcourse.tanks.domain.repositories.models.rest.User
 import io.reactivex.Observable
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.Header
-import retrofit2.http.POST
-import retrofit2.http.PUT
+import retrofit2.http.*
 
 interface IUserRestApiService {
 
@@ -30,6 +27,7 @@ interface IUserRestApiService {
      * Будет использовать для обновления текущего токена пользователя
      */
     @POST("/user/v1/refresh")
+    @Headers("Content-Type: application/json")
     fun refreshToken(
         @Header("refresh_token") refreshToken: String
     ): Call<Token>

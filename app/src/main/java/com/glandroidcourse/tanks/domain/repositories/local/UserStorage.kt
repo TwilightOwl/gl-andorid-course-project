@@ -13,9 +13,6 @@ class UserStorage {
 
     private var user: User? = null
 
-    @Inject
-    constructor()
-
     fun save(user: User) {
         this.user = user
 

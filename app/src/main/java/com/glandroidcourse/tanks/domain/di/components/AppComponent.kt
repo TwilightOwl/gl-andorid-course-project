@@ -1,5 +1,6 @@
 package com.glandroidcourse.tanks.domain.di.components
 
+import com.glandroidcourse.tanks.domain.di.modules.AppModule
 import com.glandroidcourse.tanks.domain.di.modules.NetModule
 import com.glandroidcourse.tanks.presentation.auth.AuthorizationFragment
 import com.glandroidcourse.tanks.presentation.auth.RegistrationFragment
@@ -8,7 +9,8 @@ import javax.inject.Singleton
 
 @Singleton
 @Component(modules = [
-    NetModule::class
+    NetModule::class,
+    AppModule::class
 ])
 interface AppComponent {
     fun inject(target: AuthorizationFragment)
