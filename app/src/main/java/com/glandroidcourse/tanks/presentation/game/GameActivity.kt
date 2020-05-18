@@ -8,21 +8,23 @@ class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_container)
-        showGamesList()
+        // setContentView(R.layout.activity_container)
+        setContentView(MySurfaceView(this))
+
+        //showGamesList()
     }
 
-    fun showGamesList() {
-
-//        val fragment: Fragment
-//        val backStack: String? = null
-//        val tag: String? = null
-
-        supportFragmentManager
-            .beginTransaction()
-            .add(R.id.container,
-                GameFragment()
-            )
-            .commit()
-    }
+//    fun showGamesList() {
+//
+////        val fragment: Fragment
+////        val backStack: String? = null
+////        val tag: String? = null
+//
+//        supportFragmentManager
+//            .beginTransaction()
+//            .add(R.id.container,
+//                GameFragment()
+//            )
+//            .commit()
+//    }
 }

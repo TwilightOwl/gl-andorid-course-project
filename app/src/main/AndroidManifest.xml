@@ -16,18 +16,26 @@
         tools:ignore="LockedOrientationActivity"
         android:usesCleartextTraffic="true"
         >
-        <activity android:name=".presentation.auth.AuthorizationActivity">
+
+        <activity android:name=".presentation.game.GameActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+<!--        <activity android:name=".presentation.auth.AuthorizationActivity">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
         <activity android:name=".presentation.games.GamesActivity"/>
-        <activity
-            android:screenOrientation="landscape"
-            android:configChanges="orientation|keyboardHidden"
-            android:name=".presentation.game.GameActivity"
-            />
+<!--        <activity-->
+<!--            android:screenOrientation="landscape"-->
+<!--            android:configChanges="orientation|keyboardHidden"-->
+<!--            android:name=".presentation.game.GameActivity"-->
+<!--            />-->
         <service android:name=".services.GameService" />
     </application>
 
