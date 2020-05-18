@@ -1,12 +1,12 @@
 package com.glandroidcourse.tanks.game.engine.map
 
+import com.glandroidcourse.tanks.game.engine.IBullet
 import kotlin.math.abs
 import kotlin.math.sign
 
-
 class Map {
 
-    val mapOfOrderedList = mapOf(
+    private val mapOfOrderedList = mapOf(
         Position::top to OrderedMapObjects(
             Position::top
         ),
@@ -26,6 +26,7 @@ class Map {
     }
 
     private fun addMapObject(mapObject: IMapObject) {
+        //TODO: подумать как сделать код менее уродским
         mapOfOrderedList[Position::top]!!.insert(mapObject)
         mapOfOrderedList[Position::bottom]!!.insert(mapObject)
         mapOfOrderedList[Position::left]!!.insert(mapObject)
@@ -47,6 +48,7 @@ class Map {
     }
 
     fun createTankMapObject(id: Int, name: String, player: IInteractable): IMovableMapObject {
+        //TODO: передавать через параметры или расставлять в определенных местах
         val initialLeft = 10
         val initialBottom = 10
         val tankObject = TankObject(name)
@@ -104,14 +106,14 @@ class Map {
         return bullet
     }
 
-
-
     fun processTankMotion(tankMapObjectId: Int, action: Action, currentTime: Long) {
 
         val subject: MovableMapObject = getObjectById(tankMapObjectId) as MovableMapObject? ?: throw Exception("Doesn't exist")
 
         when (action) {
-            Fire -> null // такой тип сюда не может прилететь, и вообще обрабатывается стрельба отдельно, здесь только движения
+            // такой тип сюда не может прилететь, и вообще обрабатывается стрельба отдельно, здесь только движения.
+            // поискать можно ли в kotlin action сделать типом "Action omit Fire" (Action исключая Fire)
+            Fire -> null
             is Motion -> {
                 val (direction, step) = action
                 val (subjectEdge, objectEdge) = when (direction) {
@@ -124,7 +126,7 @@ class Map {
                 val previousPosition = subjectEdge.getter.call(subject.position)
                 val newPosition = subjectEdge.getter.call(trajectory.position)
                 val intersectedObjects = mapOfOrderedList[objectEdge]!!.findIntersections(trajectory, previousPosition, newPosition)
-                //TODO: находим ближайший (первый же) упор об стену или танк (nearestSolidObject), и двигаемся только до него (nearestSolidObject +/- 1)
+                // находим ближайший (первый же) упор об стену или танк (nearestSolidObject), и двигаемся только до него (nearestSolidEdge +/- 1)
                 var nearestSolidEdge: Int? = null
                 var stepToNearestSolidEdge: Int? = null
                 for (intersectedObject in intersectedObjects) {
@@ -141,23 +143,24 @@ class Map {
                     updateMapObject(tankMapObjectId)
                 }
                 for (intersectedObject in intersectedObjects) {
-                    //TODO: если нашли ближайший упор, то получается что в траектории по которой искали пересечение
-                    // отбрасывается часть куда объект не дошел. Поэтому отбрасываем intersectedObject у которых позиция objectEdge
-                    // превышает (если Direction.RIGHT или Direction.UP, а если LEFT\DOWN - то меньше) позицию subjectEdge подвинутого объекта
-                    // (т.е. величину nearestSolidObject +/- 1)
+                    /*
+                    Если нашли ближайший упор, то получается что в траектории по которой искали пересечение
+                        отбрасывается часть куда объект не дошел. Поэтому отбрасываем intersectedObject у которых позиция objectEdge
+                        превышает (если Direction.RIGHT или Direction.UP, а если LEFT\DOWN - то меньше) позицию subjectEdge подвинутого объекта
+                        (т.е. величину nearestSolidObject +/- 1).
+                    А с остальными intersectedObjects объект будет взаимодействовать
+                    */
                     val currentObjectEdge = objectEdge.getter.call(intersectedObject.position)
                     if (step != null && nearestSolidEdge != null) {
                         if (step.sign * currentObjectEdge >= step.sign * nearestSolidEdge) {
                             break
                         }
                     }
-                    // intersectedObject попадаемые под требования (выше) и не являющиеся твердыми - взаимодействуют с объектом
                     subject.gameObject.interactWith(intersectedObject.gameObject, currentTime)
                     intersectedObject.gameObject.interactWith(subject.gameObject, currentTime)
                 }
             }
 
-            // TODO: тут какойто старый алгоритм, в motion актуальнее
             is Rotation -> {
                 val (direction) = action
                 // TODO: Учесть границы игрового поля!!!
@@ -181,12 +184,6 @@ class Map {
                         newPosition
                     )
                     for (intersectedObject in intersectedObjects) {
-                        /*
-                            if some is solid -> just return : can not be rotated
-                            else:
-                                будет повернут, и т.к. размеры увеличатся по одному направлению, то можно приравнять к
-                                 движению в этом направлении -> сдедует проверить столкновение с мягкими штуками как при обычном движении
-                             */
                         if (intersectedObject.type is WallObject || intersectedObject.type is TankObject) {
                             return@let Pair(false, null)
                         }
@@ -203,13 +200,11 @@ class Map {
                 } else {
                     subject.rotate(direction)
                     updateMapObject(tankMapObjectId)
-                    //TODO: пересечения с мягкими штуками
                     for (intersectedObject in intersectedObjects) {
                         subject.gameObject.interactWith(intersectedObject.gameObject, currentTime)
                         intersectedObject.gameObject.interactWith(subject.gameObject, currentTime)
                     }
                 }
-                // if ok return subject.rotate(direction)
             }
         }
     }
@@ -227,14 +222,9 @@ class Map {
         val previousPosition = subjectEdge.getter.call(subject.position)
         val newPosition = subjectEdge.getter.call(trajectory.position)
         val intersectedObjects = mapOfOrderedList[objectEdge]!!.findIntersections(trajectory, previousPosition, newPosition)
-        //TODO: находим ближайший (первый же) упор об стену или танк (nearestSolidObject), и двигаемся только до него (nearestSolidObject +/- 1)
+
         var nearestSolidEdge: Int? = null
         var stepToNearestSolidEdge: Int? = null
-//        1. цикл: ищем последовательные сталкновения траектории пули с предметами,
-//        1.1 вызываем Bullet.interactWith(object)
-//        1.2 вызываем Object.interactWith(bullet)
-//        1.3 если пуля жива - продолжаем цикл, если нет - выходим. Для простоты будем давать жизнь всем пулям 1, но жизнь не уменьшается например при взаимодействии с бонусами
-//        пуле наносится урон, если она врезается в твердое
         for (intersectedObject in intersectedObjects) {
             if (intersectedObject.type is WallObject || intersectedObject.type is TankObject) {
                 nearestSolidEdge = objectEdge.getter.call(intersectedObject.position)
@@ -243,6 +233,8 @@ class Map {
                 updateMapObject(bulletMapObjectId)
                 subject.gameObject.interactWith(intersectedObject.gameObject, currentTime)
                 intersectedObject.gameObject.interactWith(subject.gameObject, currentTime)
+                //TODO: если пуля жива - продолжаем цикл, если нет - выходим. Для простоты будем давать жизнь всем пулям 1,
+                // но жизнь не уменьшается например при взаимодействии с бонусами пуле наносится урон, если она врезается в твердое
                 break
             }
         }

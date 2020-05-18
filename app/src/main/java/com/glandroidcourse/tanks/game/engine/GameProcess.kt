@@ -14,7 +14,7 @@ class GameProcess {
             val deltaTime = currentTime - lastTime
             lastTime = currentTime
 
-            val actionsByPlayer = mapOf<Int, List<ControllerAction>>()
+            val actionsByPlayer = mapOf<Int, List<ControllerAction>>() //TODO
             game.nextGameTick(currentTime, deltaTime, actionsByPlayer)
 
 //

@@ -6,13 +6,7 @@ import kotlin.math.min
 import kotlin.reflect.KProperty1
 
 class OrderedMapObjects(val orderedBy: KProperty1<Position, Int>) {
-    private var objects: MutableList<IMapObject> = mutableListOf(
-//        MapObject(1, Position(1,  0,0, 0)),
-//        MapObject(2, Position(5,  0,0, 0)),
-//        MapObject(3, Position(10,  0,0, 0)),
-//        MapObject(4, Position(15,  0,0, 0)),
-//        MapObject(5, Position(20,  0,0, 0))
-    )
+    private var objects: MutableList<IMapObject> = mutableListOf()
 
     private val indexById = mutableMapOf<Int, Int>()
 
@@ -37,20 +31,7 @@ class OrderedMapObjects(val orderedBy: KProperty1<Position, Int>) {
         return foundIndex
     }
 
-    // left movement - left moving edge find right of other objects
-    //
     fun findIntersections(mapObject: IMapObject, previousPosition: Int, newPosition: Int): Array<IMapObject> {
-        /*
-        this ordered is by right edges. object is moving to left. newPosition new left edge, prevPos - old left edge
-
-        min = min(prev, new)
-        max = max(prev, new)
-
-        ind = find( by min )
-        ind to positive
-        indicesToCheckIntersectWith = getFoundIndices(ind, max)  .reverse() if new < prev (to left or to down)
-         */
-
         val min = min(previousPosition, newPosition)
         val max = max(previousPosition, newPosition)
         var foundIndex = objects.binarySearchBy(min) { orderedBy.getter.call(it.position) }

@@ -73,7 +73,6 @@ class GameLogic {
                 player.fire()
             }
         }
-        // двигаем пульки
         for (bullet in bullets) {
             val action: Action? = bullet.go(bullet.direction, deltaTime)
             if (action != null && action is Motion) {

@@ -2,9 +2,7 @@ package com.glandroidcourse.tanks.game.engine.map
 
 import kotlin.math.roundToInt
 
-interface IMovableMapObject :
-    IMapObject {
-    // публична т.к. может понадобться пересоздать объект
+interface IMovableMapObject : IMapObject {
     var lastStepError: Float
     var direction: Direction
     fun getMoveTrajectory(direction: Direction, preciseStep: Float): IMapObject
@@ -24,16 +22,12 @@ class MovableMapObject(
     override var position: Position,
     override var direction: Direction,
     override var lastStepError: Float = 0f
-
 ) : MapObject(id, gameObject, type, position),
     IMovableMapObject {
 
-    // TODO: speed и deltaTime будут обрабатываться в объектах игры а не объекта поля.
-    //  Здесь надо принимать ВЕЩЕСТВЕННУЮ длину пути (шага) на текущей итерации, и сохранять здесь же ошибку
     private fun getStep(preciseStep: Float): Pair<Int, Float> {
         val currentPreciseStep = (preciseStep + lastStepError)
         val currentDiscreteStep = currentPreciseStep.roundToInt()
-        // lastStepError = currentPreciseStep - currentDiscreteStep
         return Pair(currentDiscreteStep, currentPreciseStep - currentDiscreteStep)
     }
 
@@ -48,7 +42,6 @@ class MovableMapObject(
     }
 
     override fun move(direction: Direction, preciseStep: Float) {
-        // нужно шаг расчитать исходя из deltaTime, сохранив новую lastStepError
         val (step, stepError) = getStep(preciseStep)
         lastStepError = stepError
         when (direction) {

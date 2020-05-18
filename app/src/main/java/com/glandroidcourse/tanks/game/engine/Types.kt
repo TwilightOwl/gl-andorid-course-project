@@ -11,47 +11,8 @@ abstract class Interactable : IInteractable {
     abstract override fun interactWith(interactableObject: IInteractable, currentTime: Long)
 }
 
-interface IGameObject /*: IInteractable*/ {
+interface IGameObject {
     val id: Int
-
-//    override fun interactWith(interactableObject: IInteractable, currentTime: Int) {
-//
-//            val subjectIsDamageable = this is IDamageable
-//            val subjectIsCanHit = this is ICanHit
-//            val subjectIsSolid = this is ISolid
-//            val objectIsDamageable = interactableObject is IDamageable
-//            val objectIsCanHit = interactableObject is ICanHit
-//            val objectIsSolid = interactableObject is ISolid
-//
-//            /*
-//                пуля: Damageable, CanHit, Solid
-//                танк: Damageable, Solid
-//                стена: Solid   (Damageable для просты пока не будем делать)
-//
-//                пуля -> пуля
-//                     -> танк
-//                     -> стена
-//                     -> бонус
-//
-//                танк -> пуля
-//                     -> танк
-//                     -> стена
-//                     -> бонус
-//
-//                стена -> пуля
-//                      -> танк
-//                      -> стена Х
-//                      -> бонус Х
-//             */
-//
-//            if (subjectIsCanHit) {
-//                val subject = this as ICanHit
-//                subject.hit(interactableObject, currentTime)
-//            }
-//
-//
-//
-//    }
 }
 
 interface ISolid : IGameObject
@@ -99,19 +60,15 @@ interface IMoving : IGameObject {
     }
 }
 
-
-
 interface ICanHit : IGameObject {
     var power: Int
     fun hit(gameObject: IInteractable, currentTime: Long) {
         val subjectIsDamageable = this is IDamageable
         val objectIsDamageable = gameObject is IDamageable
         val objectIsSolid = gameObject is ISolid
-
         if (subjectIsDamageable && (this as IDamageable).isDead()) {
             return
         }
-
         if (objectIsDamageable) {
             (gameObject as IDamageable).damage(power, currentTime)
         }
@@ -120,7 +77,5 @@ interface ICanHit : IGameObject {
                 (this as IDamageable).damage(1, currentTime)
             }
         }
-
     }
 }
-
