@@ -28,7 +28,7 @@ class Player (
     }
 
     override fun processDeath(currentTime: Long) {
-        if (currentTime - deathTime > corpsePeriod) {
+        if (isDead() && currentTime - deathTime > corpsePeriod) {
             removePlayer(this)
         }
     }

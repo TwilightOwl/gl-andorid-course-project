@@ -27,13 +27,14 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:id="@+id/gameFieldFrameLayout"
             android:layout_weight="1">
 
-            <SurfaceView
-                android:id="@+id/surfaceView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/colorPrimary" />
+<!--            <SurfaceView-->
+<!--                android:id="@+id/surfaceView"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:background="@color/colorPrimary" />-->
         </FrameLayout>
 
         <RelativeLayout

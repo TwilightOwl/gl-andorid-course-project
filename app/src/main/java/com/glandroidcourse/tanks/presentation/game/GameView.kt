@@ -69,8 +69,8 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
     }
 
     // maximum number of raindrops that can be generated at the same time
-    private val maximumNewRaindrops = 50
-    private val raindropSpeed = 2500
+    private val maximumNewRaindrops = 5
+    private val raindropSpeed = 10
     private val tailLength = 120
 
     private fun drawingLogic(canvas: Canvas) {

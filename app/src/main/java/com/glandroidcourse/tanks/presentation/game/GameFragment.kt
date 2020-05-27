@@ -47,17 +47,13 @@ class GameFragment: ABaseFragment(), IGameView {
         savedInstanceState: Bundle?
     ): View? {
         val rootView = inflater.inflate(R.layout.fragment_game, container, false)
-        val sv = rootView.findViewById<SurfaceView>(R.id.surfaceView)
-        val parent: FrameLayout = sv.parent as FrameLayout
-        parent.removeAllViews()
-        parent.addView(GameView(requireContext(), presenter))
         return rootView
     }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        gameFieldFrameLayout.addView(GameView(requireContext(), presenter))
         circleButtonLeft.setOnClickListener(View.OnClickListener {
             presenter.left()
         })
