@@ -5,12 +5,14 @@ import com.glandroidcourse.tanks.game.engine.map.IInteractable
 import com.glandroidcourse.tanks.game.engine.map.Direction
 
 interface IBullet : IDamageable, IMoving, ICanHit, ISolid, IInteractable {
+    val ownerId: Int
     val bulletType: BulletType
     val removeBullet: (IBullet) -> Unit
 }
 
 class Bullet(
     override val id: Int,
+    override val ownerId: Int,
     override val bulletType: BulletType,
     override var direction: Direction,
     override val removeBullet: (bullet: IBullet) -> Unit
@@ -23,6 +25,8 @@ class Bullet(
         removeBullet(this)
     }
     override fun interactWith(interactableObject: IInteractable, currentTime: Long) {
-        this.hit(interactableObject, currentTime)
+        if (ownerId != (interactableObject as IGameObject).id) {
+            this.hit(interactableObject, currentTime)
+        }
     }
 }

@@ -22,7 +22,11 @@ class Map {
     )
 
     fun getObjectById(objectId: Int): IMapObject? {
-        return mapOfOrderedList[Position::top]!!.getObjectById(objectId)
+        val obj = mapOfOrderedList[Position::top]!!.getObjectById(objectId)
+        if (obj == null) {
+            val k = 0
+        }
+        return obj
     }
 
     private fun addMapObject(mapObject: IMapObject) {
@@ -49,8 +53,8 @@ class Map {
 
     fun createTankMapObject(id: Int, name: String, player: IInteractable): IMovableMapObject {
         //TODO: передавать через параметры или расставлять в определенных местах
-        val initialLeft = 10
-        val initialBottom = 10
+        val initialLeft = 10 + 30 * id
+        val initialBottom = 10 + 30 * id
         val tankObject = TankObject(name)
         val tank: IMovableMapObject = MovableMapObject(
             id,
@@ -107,6 +111,10 @@ class Map {
     }
 
     fun processTankMotion(tankMapObjectId: Int, action: Action, currentTime: Long) {
+
+        if (getObjectById(tankMapObjectId) == null) {
+            val f = 0
+        }
 
         val subject: MovableMapObject = getObjectById(tankMapObjectId) as MovableMapObject? ?: throw Exception("Doesn't exist")
 

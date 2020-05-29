@@ -12,12 +12,15 @@ import com.arellomobile.mvp.presenter.ProvidePresenter
 import com.glandroidcourse.tanks.App
 import com.glandroidcourse.tanks.R
 import com.glandroidcourse.tanks.base.ABaseFragment
+import com.glandroidcourse.tanks.game.engine.GameObjectName
+import com.glandroidcourse.tanks.game.engine.IGameObject
+import com.glandroidcourse.tanks.game.engine.map.Position
 import kotlinx.android.synthetic.main.fragment_game.*
 
 import javax.inject.Inject
 
 
-class GameFragment: ABaseFragment(), IGameView {
+class GameFragment: ABaseFragment(), IGameFragment {
 
     @Inject
     @InjectPresenter
@@ -33,6 +36,8 @@ class GameFragment: ABaseFragment(), IGameView {
     override fun getViewId(): Int {
         return R.layout.fragment_game
     }
+
+    var gameView: GameView? = null
 
 //    private var mContext: Context? = null
 //
@@ -50,15 +55,21 @@ class GameFragment: ABaseFragment(), IGameView {
         return rootView
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        gameFieldFrameLayout.addView(GameView(requireContext(), presenter))
-        circleButtonLeft.setOnClickListener(View.OnClickListener {
-            presenter.left()
-        })
-        circleButtonRight.setOnClickListener(View.OnClickListener {
-            presenter.right()
-        })
+        gameView = GameView(requireContext(), presenter)
+        gameFieldFrameLayout.addView(gameView)
+        btnDown.setOnClickListener(View.OnClickListener { presenter.goDown() })
+        btnUp.setOnClickListener(View.OnClickListener { presenter.goUp() })
+        btnRight.setOnClickListener(View.OnClickListener { presenter.goRight() })
+        btnLeft.setOnClickListener(View.OnClickListener { presenter.goLeft() })
+        btnFire.setOnClickListener(View.OnClickListener { presenter.fire() })
+        btnStart.setOnClickListener({ presenter.start() })
+    }
+
+    override fun onStateChanged(state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) {
+        if (gameView != null) {
+            gameView!!.onStateChanged(state)
+        }
     }
 }

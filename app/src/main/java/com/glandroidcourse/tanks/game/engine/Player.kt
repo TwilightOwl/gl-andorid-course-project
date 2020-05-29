@@ -20,8 +20,8 @@ class Player (
     override var speed: Float = 1f
     override var direction = Direction.UP
     override var weapon: BulletType = BulletType.SIMPLE
-    override var life: Int = 10
-    val corpsePeriod = 10
+    override var life: Int = 2
+    val corpsePeriod = 5000
     var deathTime: Long = 0
     override val onDeath: (currentTime: Long) -> Unit = {
         deathTime = it
@@ -34,6 +34,7 @@ class Player (
     }
 
     override fun fire() {
+
         if (isDead()) return
         return doFire(this)
     }

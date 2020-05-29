@@ -17,7 +17,7 @@
             android:layout_height="match_parent">
 
             <ImageView
-                android:id="@+id/circleButtonLeft"
+                android:id="@+id/btnStart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:srcCompat="@drawable/circle_button"
@@ -43,10 +43,43 @@
             android:layout_height="match_parent">
 
             <ImageView
-                android:id="@+id/circleButtonRight"
+                android:id="@+id/btnUp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:srcCompat="@drawable/circle_button"
+                android:layout_below="@id/btnDown"
+                app:srcCompat="@drawable/circle_mini_button"
+                tools:ignore="VectorDrawableCompat" />
+
+            <ImageView
+                android:id="@+id/btnDown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/btnLeft"
+                app:srcCompat="@drawable/circle_mini_button"
+                tools:ignore="VectorDrawableCompat" />
+
+            <ImageView
+                android:id="@+id/btnLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/btnRight"
+                app:srcCompat="@drawable/circle_mini_button"
+                tools:ignore="VectorDrawableCompat" />
+
+            <ImageView
+                android:id="@+id/btnRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                app:srcCompat="@drawable/circle_mini_button"
+                tools:ignore="VectorDrawableCompat" />
+
+            <ImageView
+                android:id="@+id/btnFire"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/btnUp"
+                app:srcCompat="@drawable/circle_mini_button"
                 tools:ignore="VectorDrawableCompat" />
         </RelativeLayout>
 

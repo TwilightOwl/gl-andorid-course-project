@@ -10,8 +10,14 @@ class OrderedMapObjects(val orderedBy: KProperty1<Position, Int>) {
 
     private val indexById = mutableMapOf<Int, Int>()
 
+    fun getIndexById(objectId: Int): Int? {
+        val index = objects.indexOfFirst { it.id === objectId }
+        return if (index == -1) null else index
+        // objects.find { it.id === objectId }
+    }
+
     fun getObjectById(objectId: Int): IMapObject? {
-        return indexById[objectId]?.let { objects[it] }
+        return getIndexById(objectId)?.let { objects[it] }
     }
 
     private fun getFoundIndices(index: Int, previousValue: Int): Array<Int> {
@@ -26,8 +32,12 @@ class OrderedMapObjects(val orderedBy: KProperty1<Position, Int>) {
     fun insert(mapObject: IMapObject): Int {
         var foundIndex = objects.binarySearchBy(orderedBy.getter.call(mapObject.position)) { orderedBy.getter.call(it.position) }
         if (foundIndex < 0) foundIndex = -(foundIndex + 1)
-        objects.add(foundIndex, mapObject)
+
         indexById.put(mapObject.id, foundIndex)
+        objects.add(foundIndex, mapObject)
+        if (objects.size != indexById.size) {
+            val l = 0
+        }
         return foundIndex
     }
 
@@ -52,13 +62,31 @@ class OrderedMapObjects(val orderedBy: KProperty1<Position, Int>) {
     }
 
     fun remove(objectId: Int): IMapObject? {
-        val index = indexById[objectId] ?: return null
+        // val index = indexById[objectId] ?: return null
+        val index = getIndexById(objectId) ?: return null
+
+
+        val r = objects.removeAt(index)
         indexById.remove(objectId)
-        return objects.removeAt(index)
+        if (objects.size != indexById.size) {
+            val l = 0
+        }
+        return r
     }
 
     fun update(objectId: Int): Int? {
-        return remove(objectId)?.let{ insert(it) }
+        //return 1
+        val prev = indexById.size
+        val r = remove(objectId)?.let{
+            if (it == null) {
+                val l = 0
+            }
+            insert(it)
+        }
+        if (prev != indexById.size || objects.size != indexById.size) {
+            val f = 0
+        }
+        return r
     }
 
 }

@@ -9,6 +9,12 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.arellomobile.mvp.presenter.ProvidePresenter
+import com.glandroidcourse.tanks.game.engine.GameObjectName
+import com.glandroidcourse.tanks.game.engine.IBullet
+import com.glandroidcourse.tanks.game.engine.IGameObject
+import com.glandroidcourse.tanks.game.engine.IPlayer
+import com.glandroidcourse.tanks.game.engine.map.Direction
+import com.glandroidcourse.tanks.game.engine.map.Position
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import kotlin.random.Random
@@ -41,6 +47,7 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
+        return
         drawingJob = GlobalScope.launch {
             // While this coroutine is running
             while(isActive) {
@@ -105,5 +112,92 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
 
         // remove drops out of the screen
         raindrops.removeAll(terminatingDrops)
+    }
+
+    fun drawState(canvas: Canvas, state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) {
+        canvas.drawColor(presenter.color)
+        for ((objectName, objects) in state) {
+            when (objectName) {
+                GameObjectName.PLAYER -> {
+                    for ((obj, position) in objects) {
+                        val player = obj as IPlayer
+                        drawTank(canvas, position, player.direction, player.isDead(), player.life)
+                    }
+                }
+                GameObjectName.BULLET -> {
+                    for ((obj, position) in objects) {
+                        val bullet = obj as IBullet
+                        drawBullet(canvas, position, bullet.direction)
+                    }
+                }
+                GameObjectName.WALL -> {
+                    for ((obj, position) in objects) {
+                        val player = obj as IWall
+                        drawWall(canvas, position, player.isDead(), player.life)
+                    }
+                }
+                GameObjectName.BONUS -> {}
+            }
+        }
+    }
+
+    fun onStateChanged(state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) {
+        drawingJob = GlobalScope.launch {
+            val canvas = holder.lockCanvas()
+            if (canvas != null) {
+                try {
+                    synchronized(holder) {
+                        // drawing logic
+                        drawState(canvas, state)
+                    }
+                } finally {
+                    // print to screen
+                    holder.unlockCanvasAndPost(canvas)
+                }
+            }
+        }
+    }
+
+    private fun drawTank(canvas: Canvas, position: Position, direction: Direction, isDead: Boolean, life: Int) {
+        val coef = 10
+        val (top, bottom, left, right) = position
+        val p = Paint()
+        //val xCenter = (right - left) * 0.5
+        //val yCenter = (top - bottom) * 0.5
+        p.color = if (isDead) Color.BLACK else if (life == 1) Color.YELLOW else Color.GREEN
+        canvas.drawRect(
+            coef * cellLeft(left.toFloat()),
+            coef * cellTop(top.toFloat()),
+            coef * cellRight(right.toFloat()),
+            coef * cellBottom(bottom.toFloat()),
+            p
+        )
+    }
+
+    fun cellLeft(x: Float): Float = x - 0.5f
+    fun cellBottom(x: Float): Float = x - 0.5f
+    fun cellTop(x: Float): Float = x + 0.5f
+    fun cellRight(x: Float): Float = x + 0.5f
+
+
+    private fun drawBullet(canvas: Canvas, position: Position, direction: Direction) {
+        val coef = 10
+        val (top, bottom, left, right) = position
+        val p = Paint()
+        //val xCenter = (right - left) * 0.5
+        //val yCenter = (top - bottom) * 0.5
+        p.color = Color.RED
+        canvas.drawRect(
+            coef * cellLeft(left.toFloat()),
+            coef * cellTop(top.toFloat()),
+            coef * cellRight(right.toFloat()),
+            coef * cellBottom(bottom.toFloat()),
+            p
+        )
+    }
+
+    private fun drawWall(canvas: Canvas, position: Position, isDead: Boolean, life: Int) {
+
+
     }
 }

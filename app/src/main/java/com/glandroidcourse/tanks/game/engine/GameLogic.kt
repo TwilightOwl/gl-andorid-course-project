@@ -45,6 +45,7 @@ class GameLogic {
         val id = getNextId()
         val bullet = Bullet(
             id,
+            player.id,
             player.weapon,
             player.direction,
             removeBullet = { removeBullet(it) }
@@ -54,6 +55,30 @@ class GameLogic {
         return bullet
     }
 
+    fun getCurrentState(): Map<GameObjectName, List<Pair<IGameObject, Position>>> {
+//        //return Pair(
+//        return players.map { Pair(it, map.getObjectById(it.id)!!.position) }
+//            //bullets.map { Pair(it, map.getObjectById(it.id)!!.position) }
+//        //)
+
+
+        for (player in players) {
+            val p = map.getObjectById(player.id)
+            if (p == null) {
+                val i = 0
+            } else {
+                p.position
+            }
+        }
+        val p = players.map { Pair(it, map.getObjectById(it.id)!!.position) }
+        val b = bullets.map { Pair(it, map.getObjectById(it.id)!!.position) }
+
+        return mutableMapOf<GameObjectName, List<Pair<IGameObject, Position>>>(
+            GameObjectName.PLAYER to p,
+            GameObjectName.BULLET to b
+        )
+
+    }
 
     fun nextGameTick(currentTime: Long, deltaTime: Long, actionsByPlayer: Map<Int, List<ControllerAction>>) {
         for (player in players) {
@@ -73,13 +98,13 @@ class GameLogic {
                 player.fire()
             }
         }
-        for (bullet in bullets) {
+        for (bullet in bullets.map{ it }) {
             val action: Action? = bullet.go(bullet.direction, deltaTime)
             if (action != null && action is Motion) {
                 map.processBulletMotion(bullet.id, action, currentTime)
             }
         }
-        for (player in players) {
+        for (player in players.map{ it }) {
             player.processDeath(currentTime)
         }
     }
