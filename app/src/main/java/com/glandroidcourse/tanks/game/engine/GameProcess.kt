@@ -23,7 +23,10 @@ class GameProcess {
         var stop = false
         // val players = listOf<IPlayer>() // TODO
 
+
         game.initPlayers(3)
+        game.initWalls()
+
 
         var lastTime: Long = System.currentTimeMillis()
 
@@ -37,10 +40,10 @@ class GameProcess {
 
             val actionsByPlayer = mutableMapOf<Int, List<ControllerAction>>() //TODO
 
-            i++
-            if (i == 2) {
-                firePressed = true
-            }
+//            i++
+//            if (i == 2) {
+//                firePressed = true
+//            }
 
             val actions =
                 TEMPDirection?.let { mutableListOf<ControllerAction>(ControllerMotion(it)) } ?: mutableListOf()

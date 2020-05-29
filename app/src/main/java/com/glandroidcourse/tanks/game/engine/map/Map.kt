@@ -67,6 +67,13 @@ class Map {
         return tank
     }
 
+    fun createWallMapObject(id: Int, wall: IInteractable, type: WallType, position: Position): IMapObject {
+        val wallObject = WallObject(type)
+        val wall: MapObject = MapObject(id, wall, wallObject, position)
+        addMapObject(wall)
+        return wall
+    }
+
     fun createBulletMapObject(id: Int, bulletType: BulletType, bullet: IInteractable, tankMapObject: IMovableMapObject): IMovableMapObject {
         val (top, bottom, left, right) = tankMapObject.position
         val horizontalMiddle: Int = right - (right - left + 1) / 2

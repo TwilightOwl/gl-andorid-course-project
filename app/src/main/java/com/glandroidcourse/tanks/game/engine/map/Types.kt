@@ -33,7 +33,7 @@ data class WallObject(val wallType: WallType) : BaseObjectType()
 // data class Bonus(val type: BonusType) : BaseObject()
 
 enum class WallType(val solidity: Int) {
-    SOLID(-1),
+    SOLID(1000),
     DESTROYABLE(1),
     STRONG(5)
 }

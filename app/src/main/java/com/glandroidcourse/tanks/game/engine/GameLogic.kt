@@ -13,8 +13,14 @@ class GameLogic {
 
     val players = mutableListOf<IPlayer>()
     val bullets = mutableListOf<IBullet>()
+    val walls = mutableListOf<IWall>()
+    // val bonuses = mutableListOf<IBullet>()
     val map = Map()
 
+    fun initWalls() {
+        addWall(WallType.SOLID, Position(70, 0, 0, 5))
+        addWall(WallType.DESTROYABLE, Position(70, 0, 100, 105))
+    }
 
     fun initPlayers(count: Int): List<Int> {
         return List(count) { addPlayer(it.toString()).id }
@@ -55,6 +61,23 @@ class GameLogic {
         return bullet
     }
 
+    private fun addWall(type: WallType, position: Position): IWall {
+        //val tankMapObject: MovableMapObject = map.getObjectById(player.id) as MovableMapObject? ?: throw Exception("Doesn't exist")
+        fun removeWall(wall: IWall) {
+            map.removeMapObject(wall.id)
+            walls.remove(wall)
+        }
+        val id = getNextId()
+        val wall = Wall(
+            id,
+            type,
+            removeWall = { removeWall(it) }
+        )
+        walls.add(wall)
+        map.createWallMapObject(id, wall, type, position)
+        return wall
+    }
+
     fun getCurrentState(): Map<GameObjectName, List<Pair<IGameObject, Position>>> {
 //        //return Pair(
 //        return players.map { Pair(it, map.getObjectById(it.id)!!.position) }
@@ -72,10 +95,12 @@ class GameLogic {
         }
         val p = players.map { Pair(it, map.getObjectById(it.id)!!.position) }
         val b = bullets.map { Pair(it, map.getObjectById(it.id)!!.position) }
+        val w = walls.map { Pair(it, map.getObjectById(it.id)!!.position) }
 
         return mutableMapOf<GameObjectName, List<Pair<IGameObject, Position>>>(
             GameObjectName.PLAYER to p,
-            GameObjectName.BULLET to b
+            GameObjectName.BULLET to b,
+            GameObjectName.WALL to w
         )
 
     }

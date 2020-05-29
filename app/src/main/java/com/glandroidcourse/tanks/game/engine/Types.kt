@@ -23,6 +23,7 @@ interface IDamageable : IGameObject {
     var life: Int
     val onDeath: (currentTime: Long) -> Unit
     fun damage(value: Int, currentTime: Long) {
+        if (life >= 1000) return
         life = max(0, life - value)
         if (isDead()) {
             onDeath(currentTime)

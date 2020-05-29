@@ -9,10 +9,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.arellomobile.mvp.presenter.ProvidePresenter
-import com.glandroidcourse.tanks.game.engine.GameObjectName
-import com.glandroidcourse.tanks.game.engine.IBullet
-import com.glandroidcourse.tanks.game.engine.IGameObject
-import com.glandroidcourse.tanks.game.engine.IPlayer
+import com.glandroidcourse.tanks.game.engine.*
 import com.glandroidcourse.tanks.game.engine.map.Direction
 import com.glandroidcourse.tanks.game.engine.map.Position
 import kotlinx.coroutines.*
@@ -197,7 +194,18 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
     }
 
     private fun drawWall(canvas: Canvas, position: Position, isDead: Boolean, life: Int) {
-
-
+        val coef = 10
+        val (top, bottom, left, right) = position
+        val p = Paint()
+        //val xCenter = (right - left) * 0.5
+        //val yCenter = (top - bottom) * 0.5
+        p.color = if (life == 1000) Color.LTGRAY else Color.rgb(190, 50, 0)
+        canvas.drawRect(
+            coef * cellLeft(left.toFloat()),
+            coef * cellTop(top.toFloat()),
+            coef * cellRight(right.toFloat()),
+            coef * cellBottom(bottom.toFloat()),
+            p
+        )
     }
 }
