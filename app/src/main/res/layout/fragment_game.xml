@@ -9,78 +9,107 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/black"
         android:orientation="horizontal">
 
         <RelativeLayout
-            android:gravity="bottom"
-            android:layout_width="100dp"
-            android:layout_height="match_parent">
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:gravity="bottom">
 
-            <ImageView
-                android:id="@+id/btnStart"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:srcCompat="@drawable/circle_button"
-                tools:ignore="VectorDrawableCompat" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/btnFire"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:srcCompat="@drawable/circle_mini_button"
+                    tools:ignore="VectorDrawableCompat" />
+
+                <ImageView
+                    android:id="@+id/btnStart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/circle_mini_button"
+                    tools:ignore="VectorDrawableCompat" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </RelativeLayout>
 
         <FrameLayout
+            android:id="@+id/gameFieldFrameLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/gameFieldFrameLayout"
             android:layout_weight="1">
 
-<!--            <SurfaceView-->
-<!--                android:id="@+id/surfaceView"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:background="@color/colorPrimary" />-->
+            <!--            <SurfaceView-->
+            <!--                android:id="@+id/surfaceView"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="match_parent"-->
+            <!--                android:background="@color/colorPrimary" />-->
         </FrameLayout>
 
         <RelativeLayout
-            android:gravity="bottom"
-            android:layout_width="100dp"
-            android:layout_height="match_parent">
+            android:layout_width="120dp"
+            android:layout_height="match_parent"
+            android:gravity="bottom">
 
-            <ImageView
-                android:id="@+id/btnUp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/btnDown"
-                app:srcCompat="@drawable/circle_mini_button"
-                tools:ignore="VectorDrawableCompat" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="150dp"
+                android:layout_height="150dp">
 
-            <ImageView
-                android:id="@+id/btnDown"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/btnLeft"
-                app:srcCompat="@drawable/circle_mini_button"
-                tools:ignore="VectorDrawableCompat" />
+                <ImageView
+                    android:id="@+id/btnRight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
 
-            <ImageView
-                android:id="@+id/btnLeft"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/btnRight"
-                app:srcCompat="@drawable/circle_mini_button"
-                tools:ignore="VectorDrawableCompat" />
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/circle_mini_button"
+                    tools:ignore="VectorDrawableCompat" />
 
-            <ImageView
-                android:id="@+id/btnRight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                <ImageView
+                    android:id="@+id/btnLeft"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/circle_mini_button"
+                    tools:ignore="VectorDrawableCompat" />
 
-                app:srcCompat="@drawable/circle_mini_button"
-                tools:ignore="VectorDrawableCompat" />
+                <ImageView
+                    android:id="@+id/btnUp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/circle_mini_button"
+                    tools:ignore="VectorDrawableCompat" />
 
-            <ImageView
-                android:id="@+id/btnFire"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/btnUp"
-                app:srcCompat="@drawable/circle_mini_button"
-                tools:ignore="VectorDrawableCompat" />
+                <ImageView
+                    android:id="@+id/btnDown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:srcCompat="@drawable/circle_mini_button"
+                    tools:ignore="VectorDrawableCompat" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </RelativeLayout>
 
     </LinearLayout>

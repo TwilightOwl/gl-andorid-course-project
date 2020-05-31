@@ -3,6 +3,8 @@ package com.glandroidcourse.tanks.game.engine
 import com.glandroidcourse.tanks.game.engine.map.*
 import kotlin.math.max
 
+val GAME_SPEED = 0.015f
+
 enum class GameObjectName { PLAYER, BULLET, WALL, BONUS }
 
 sealed class ControllerAction
@@ -44,7 +46,7 @@ interface IMoving : IGameObject {
         }
         if (direction == this.direction) {
             this.speed = availableSpeed
-            val step = deltaTime * this.speed * 0.01f
+            val step = deltaTime * this.speed * GAME_SPEED
             return Motion(direction, step)
         } else {
             stop()

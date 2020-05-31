@@ -20,7 +20,7 @@ class GamePresenter : MvpPresenter<IGameFragment> {
 
     val gameProcess = GameProcess()
 
-    var color = Color.DKGRAY
+
 
     fun onStateChanged(state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) {
         // println(state)
@@ -28,7 +28,7 @@ class GamePresenter : MvpPresenter<IGameFragment> {
     }
 
     fun start() {
-        color = Color.BLUE
+
         //TODO make it async or run in separate thread because now it blocks
         thread { gameProcess.process({ state -> onStateChanged(state) }) }
         //gameProcess.process({ state -> onStateChanged(state) })
@@ -36,8 +36,8 @@ class GamePresenter : MvpPresenter<IGameFragment> {
         val r = 9
     }
 
-    fun goUp() { gameProcess.goUp() }
-    fun goDown() { gameProcess.goDown() }
+    fun goUp() { gameProcess.goDown() }
+    fun goDown() { gameProcess.goUp() }
     fun goRight() { gameProcess.goRight() }
     fun goLeft() { gameProcess.goLeft() }
     fun fire() { gameProcess.fire() }
@@ -45,7 +45,7 @@ class GamePresenter : MvpPresenter<IGameFragment> {
     fun old() {
         i++
         if (i > 4) i = 0
-        // color = Color.RED
+
         when (i) {
             0 -> gameProcess.stop()
             1 -> gameProcess.goUp()

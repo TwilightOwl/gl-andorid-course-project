@@ -46,23 +46,23 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         return
-        drawingJob = GlobalScope.launch {
-            // While this coroutine is running
-            while(isActive) {
-                // canvas for double buffering
-                val canvas = holder.lockCanvas()?: continue
-
-                try {
-                    synchronized(holder) {
-                        // drawing logic
-                        drawingLogic(canvas)
-                    }
-                } finally {
-                    // print to screen
-                    holder.unlockCanvasAndPost(canvas)
-                }
-            }
-        }
+//        drawingJob = GlobalScope.launch {
+//            // While this coroutine is running
+//            while(isActive) {
+//                // canvas for double buffering
+//                val canvas = holder.lockCanvas()?: continue
+//
+//                try {
+//                    synchronized(holder) {
+//                        // drawing logic
+//                        drawingLogic(canvas)
+//                    }
+//                } finally {
+//                    // print to screen
+//                    holder.unlockCanvasAndPost(canvas)
+//                }
+//            }
+//        }
     }
 
     private val raindrops = mutableListOf<Pair<Int, Long>>()
@@ -78,42 +78,42 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
     private val raindropSpeed = 10
     private val tailLength = 120
 
-    private fun drawingLogic(canvas: Canvas) {
-        // clear canvas
-        canvas.drawColor(presenter.color)
-
-        val time = System.currentTimeMillis()
-
-        // generate raindrops
-        repeat(Random.nextInt(maximumNewRaindrops + 1)) {
-            newRainDrop(canvas.width, time)
-        }
-
-        // color of the raindrops
-        val p = Paint()
-        p.color = Color.WHITE
-
-        // draw raindrops
-        val terminatingDrops = mutableListOf<Pair<Int, Long>>()
-        raindrops.forEach { drop ->
-            // calculate position
-            val x = drop.first.toFloat()
-            val y = ((time - drop.second) / 1000f * raindropSpeed)
-
-            if(y > canvas.height) {
-                // drops out of the screen
-                terminatingDrops.add(drop)
-            } else {
-                canvas.drawRect(x, y-tailLength, x+1, y, p)
-            }
-        }
-
-        // remove drops out of the screen
-        raindrops.removeAll(terminatingDrops)
-    }
+//    private fun drawingLogic(canvas: Canvas) {
+//        // clear canvas
+//        canvas.drawColor(presenter.color)
+//
+//        val time = System.currentTimeMillis()
+//
+//        // generate raindrops
+//        repeat(Random.nextInt(maximumNewRaindrops + 1)) {
+//            newRainDrop(canvas.width, time)
+//        }
+//
+//        // color of the raindrops
+//        val p = Paint()
+//        p.color = Color.WHITE
+//
+//        // draw raindrops
+//        val terminatingDrops = mutableListOf<Pair<Int, Long>>()
+//        raindrops.forEach { drop ->
+//            // calculate position
+//            val x = drop.first.toFloat()
+//            val y = ((time - drop.second) / 1000f * raindropSpeed)
+//
+//            if(y > canvas.height) {
+//                // drops out of the screen
+//                terminatingDrops.add(drop)
+//            } else {
+//                canvas.drawRect(x, y-tailLength, x+1, y, p)
+//            }
+//        }
+//
+//        // remove drops out of the screen
+//        raindrops.removeAll(terminatingDrops)
+//    }
 
     fun drawState(canvas: Canvas, state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) {
-        canvas.drawColor(presenter.color)
+        canvas.drawColor(Color.BLACK)
         for ((objectName, objects) in state) {
             when (objectName) {
                 GameObjectName.PLAYER -> {
@@ -147,6 +147,7 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
     fun onStateChanged(state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) {
         drawingJob = GlobalScope.launch {
             val canvas = holder.lockCanvas()
+            // canvas.scale(1f, -1f, width / 2f, height / 2f)
             if (canvas != null) {
                 try {
                     synchronized(holder) {
@@ -161,14 +162,14 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
         }
     }
 
-    private val coef = 7
+    private val coef = 9
 
     private fun drawTank(canvas: Canvas, position: Position, direction: Direction, isDead: Boolean, life: Int) {
         val (top, bottom, left, right) = position
         val p = Paint()
         //val xCenter = (right - left) * 0.5
         //val yCenter = (top - bottom) * 0.5
-        p.color = if (isDead) Color.BLACK else if (life == 1) Color.YELLOW else Color.GREEN
+        p.color = if (isDead) Color.GRAY else if (life == 1) Color.YELLOW else Color.GREEN
         canvas.drawRect(
             coef * cellLeft(left.toFloat()),
             coef * cellTop(top.toFloat()),
@@ -177,15 +178,15 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
             p
         )
 
-        p.color = Color.BLACK
+        p.color = Color.WHITE
         p.textSize = 30f
         canvas.drawText("$life", coef * left.toFloat(), coef * top.toFloat(), p)
     }
 
-    fun cellLeft(x: Float): Float = x - 0.5f
-    fun cellBottom(x: Float): Float = x - 0.5f
-    fun cellTop(x: Float): Float = x + 0.5f
-    fun cellRight(x: Float): Float = x + 0.5f
+    fun cellLeft(x: Float, extra: Float = 0f): Float = x - 0.5f - extra
+    fun cellBottom(x: Float, extra: Float = 0f): Float = x - 0.5f - extra
+    fun cellTop(x: Float, extra: Float = 0f): Float = x + 0.5f + extra
+    fun cellRight(x: Float, extra: Float = 0f): Float = x + 0.5f + extra
 
 
     private fun drawBullet(canvas: Canvas, position: Position, direction: Direction, type: BulletType) {
@@ -194,18 +195,19 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
         val p = Paint()
         //val xCenter = (right - left) * 0.5
         //val yCenter = (top - bottom) * 0.5
-        p.color = Color.RED
+        p.color = if (type.power == 1) Color.RED else Color.MAGENTA
+        val extra = if (type.power == 1) 0f else 0.7f
         canvas.drawRect(
-            coef * cellLeft(left.toFloat()),
-            coef * cellTop(top.toFloat()),
-            coef * cellRight(right.toFloat()),
-            coef * cellBottom(bottom.toFloat()),
+            coef * cellLeft(left.toFloat(), extra),
+            coef * cellTop(top.toFloat(), extra),
+            coef * cellRight(right.toFloat(), extra),
+            coef * cellBottom(bottom.toFloat(), extra),
             p
         )
 
 
 
-        p.color = Color.BLACK
+        p.color = Color.WHITE
         p.textSize = 30f
         canvas.drawText("${type.power}", coef * left.toFloat(), coef * top.toFloat(), p)
     }

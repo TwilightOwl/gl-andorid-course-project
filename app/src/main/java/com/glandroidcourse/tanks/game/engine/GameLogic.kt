@@ -21,7 +21,7 @@ class GameLogic {
 
     val BLOCK_SIZE = 5  // 3
     val BLOCK_Y_COUNT = 24 // 40
-    val BLOCK_X_COUNT = 32 // 54
+    val BLOCK_X_COUNT = 33 // 54
 
     fun initWorld(playerCount: Int) {
         val width = 162

@@ -21,6 +21,8 @@
             android:name=".presentation.game.GameActivity"
             android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden"
+            android:theme="@style/AppTheme.Game"
+
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
