@@ -1,6 +1,8 @@
 package com.glandroidcourse.tanks.presentation.game
 
+import android.R
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -10,8 +12,7 @@ import android.view.SurfaceView
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.arellomobile.mvp.presenter.ProvidePresenter
 import com.glandroidcourse.tanks.game.engine.*
-import com.glandroidcourse.tanks.game.engine.map.Direction
-import com.glandroidcourse.tanks.game.engine.map.Position
+import com.glandroidcourse.tanks.game.engine.map.*
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import kotlin.random.Random
@@ -124,16 +125,21 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
                 GameObjectName.BULLET -> {
                     for ((obj, position) in objects) {
                         val bullet = obj as IBullet
-                        drawBullet(canvas, position, bullet.direction)
+                        drawBullet(canvas, position, bullet.direction, bullet.bulletType)
                     }
                 }
                 GameObjectName.WALL -> {
                     for ((obj, position) in objects) {
-                        val player = obj as IWall
-                        drawWall(canvas, position, player.isDead(), player.life)
+                        val wall = obj as IWall
+                        drawWall(canvas, position, wall.life, wall.wallType)
                     }
                 }
-                GameObjectName.BONUS -> {}
+                GameObjectName.BONUS -> {
+                    for ((obj, position) in objects) {
+                        val bonus = obj as IBonus
+                        drawBonus(canvas, position, bonus.bonusType)
+                    }
+                }
             }
         }
     }
@@ -155,8 +161,9 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
         }
     }
 
+    private val coef = 7
+
     private fun drawTank(canvas: Canvas, position: Position, direction: Direction, isDead: Boolean, life: Int) {
-        val coef = 10
         val (top, bottom, left, right) = position
         val p = Paint()
         //val xCenter = (right - left) * 0.5
@@ -169,6 +176,10 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
             coef * cellBottom(bottom.toFloat()),
             p
         )
+
+        p.color = Color.BLACK
+        p.textSize = 30f
+        canvas.drawText("$life", coef * left.toFloat(), coef * top.toFloat(), p)
     }
 
     fun cellLeft(x: Float): Float = x - 0.5f
@@ -177,8 +188,8 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
     fun cellRight(x: Float): Float = x + 0.5f
 
 
-    private fun drawBullet(canvas: Canvas, position: Position, direction: Direction) {
-        val coef = 10
+    private fun drawBullet(canvas: Canvas, position: Position, direction: Direction, type: BulletType) {
+
         val (top, bottom, left, right) = position
         val p = Paint()
         //val xCenter = (right - left) * 0.5
@@ -191,15 +202,48 @@ class GameView(context: Context, val presenter: GamePresenter, attrs: AttributeS
             coef * cellBottom(bottom.toFloat()),
             p
         )
+
+
+
+        p.color = Color.BLACK
+        p.textSize = 30f
+        canvas.drawText("${type.power}", coef * left.toFloat(), coef * top.toFloat(), p)
     }
 
-    private fun drawWall(canvas: Canvas, position: Position, isDead: Boolean, life: Int) {
-        val coef = 10
+    private fun drawWall(canvas: Canvas, position: Position, life: Int, wallType: WallType) {
+
         val (top, bottom, left, right) = position
         val p = Paint()
-        //val xCenter = (right - left) * 0.5
-        //val yCenter = (top - bottom) * 0.5
-        p.color = if (life == 1000) Color.LTGRAY else Color.rgb(190, 50, 0)
+        p.color = when (wallType) {
+            WallType.SOLID -> Color.LTGRAY
+            WallType.DESTROYABLE -> Color.rgb(190, 50, 0)
+            WallType.STRONG -> if (life == 1) Color.rgb(190, 50, 0) else Color.rgb(110, 30, 0)
+        }
+
+        canvas.drawRect(
+            coef * cellLeft(left.toFloat()),
+            coef * cellTop(top.toFloat()),
+            coef * cellRight(right.toFloat()),
+            coef * cellBottom(bottom.toFloat()),
+            p
+        )
+
+//        val res = resources
+//        val bitmap = BitmapFactory.decodeResource(res, R.drawable.pic)
+//        canvas.drawBitmap(bitmap, 0f, 0f, p)
+    }
+
+    private fun drawBonus(canvas: Canvas, position: Position, type: BonusType) {
+
+        val (top, bottom, left, right) = position
+        val p = Paint()
+        // type is BonusType
+        p.color = when (type) {
+            BonusType.LIFE_EXTRA -> Color.RED
+            BonusType.WEAPON_HEAVY -> Color.WHITE
+            BonusType.WEAPON_FAST -> Color.CYAN
+            BonusType.SPEED_FAST -> Color.MAGENTA
+        }
         canvas.drawRect(
             coef * cellLeft(left.toFloat()),
             coef * cellTop(top.toFloat()),

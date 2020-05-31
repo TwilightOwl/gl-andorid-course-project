@@ -9,7 +9,7 @@ class GameProcess {
 
     val game = GameLogic()
 
-    var TEMPDirection: Direction? = Direction.RIGHT
+    var TEMPDirection: Direction? = null // Direction.RIGHT
     var firePressed = false
 
     fun goUp() { TEMPDirection = Direction.UP }
@@ -24,8 +24,7 @@ class GameProcess {
         // val players = listOf<IPlayer>() // TODO
 
 
-        game.initPlayers(3)
-        game.initWalls()
+        game.initWorld(4)
 
 
         var lastTime: Long = System.currentTimeMillis()
@@ -55,6 +54,7 @@ class GameProcess {
             actionsByPlayer[0] = actions
             actionsByPlayer[1] = mutableListOf()
             actionsByPlayer[2] = mutableListOf()
+            actionsByPlayer[3] = mutableListOf()
 
             game.nextGameTick(currentTime, deltaTime, actionsByPlayer)
             val state = game.getCurrentState()

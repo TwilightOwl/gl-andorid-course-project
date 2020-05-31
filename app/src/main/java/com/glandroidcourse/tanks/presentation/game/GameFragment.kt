@@ -65,6 +65,11 @@ class GameFragment: ABaseFragment(), IGameFragment {
         btnLeft.setOnClickListener(View.OnClickListener { presenter.goLeft() })
         btnFire.setOnClickListener(View.OnClickListener { presenter.fire() })
         btnStart.setOnClickListener({ presenter.start() })
+
+//        btnLeft.setOnTouchListener({
+//            println("c")
+//            return true
+//        })
     }
 
     override fun onStateChanged(state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) {

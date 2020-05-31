@@ -25,24 +25,31 @@ data class Position(var top: Int, var bottom: Int, var left: Int, var right: Int
 
 sealed class BaseObjectType
 data class TankObject(val name: String) : BaseObjectType() {
-    val width = 3
-    val height = 4
+    //val width = 3
+    //val height = 4
 }
 data class BulletObject(val bulletType: BulletType) : BaseObjectType()
 data class WallObject(val wallType: WallType) : BaseObjectType()
-// data class Bonus(val type: BonusType) : BaseObject()
+data class BonusObject(val bonusType: BonusType) : BaseObjectType()
 
 enum class WallType(val solidity: Int) {
     SOLID(1000),
     DESTROYABLE(1),
-    STRONG(5)
+    STRONG(2)
 }
 
 // Пули должны быть быстрее чем танки!!!
 enum class BulletType(val speed: Float, val power: Int) {
-    SIMPLE(2f, 1),
-    HEAVY(2f, 2),
-    FAST(4f, 1)
+    SIMPLE(3f, 1),
+    HEAVY(3f, 2),
+    FAST(5f, 1)
+}
+
+enum class BonusType(val extraLife: Int?, val bulletType: BulletType?, val speed: Float? ) {
+    LIFE_EXTRA(3, null, null),
+    WEAPON_HEAVY(null, BulletType.HEAVY, null),
+    WEAPON_FAST(null, BulletType.FAST, null),
+    SPEED_FAST(null, null, 2f)
 }
 
 sealed class Action

@@ -10,6 +10,23 @@ class OrderedMapObjects(val orderedBy: KProperty1<Position, Int>) {
 
     private val indexById = mutableMapOf<Int, Int>()
 
+    // Это кастомная функция быстрого поиска, посколько нужно найти первый по порядку элемент в массиве
+    // удовлетворяющий условию, а binarySearcBy останавливается на первом попавшемся элементе (бинарный
+    // поиск делит по полам текущий сегмент)
+    fun <T> searchLowerBound(list: List<T>, value: Int, extract: (T) -> Int ): Int {
+        var l = -1
+        var r = list.size
+        while (l + 1 < r) {
+            val m = (l + r) ushr 1
+            if (extract(list[m]) >= value) {
+                r = m
+            } else {
+                l = m
+            }
+        }
+        return r
+    }
+
     fun getIndexById(objectId: Int): Int? {
         val index = objects.indexOfFirst { it.id === objectId }
         return if (index == -1) null else index
@@ -30,9 +47,7 @@ class OrderedMapObjects(val orderedBy: KProperty1<Position, Int>) {
     }
 
     fun insert(mapObject: IMapObject): Int {
-        var foundIndex = objects.binarySearchBy(orderedBy.getter.call(mapObject.position)) { orderedBy.getter.call(it.position) }
-        if (foundIndex < 0) foundIndex = -(foundIndex + 1)
-
+        var foundIndex = searchLowerBound(objects, orderedBy.getter.call(mapObject.position), { orderedBy.getter.call(it.position) })
         indexById.put(mapObject.id, foundIndex)
         objects.add(foundIndex, mapObject)
         if (objects.size != indexById.size) {
@@ -44,8 +59,7 @@ class OrderedMapObjects(val orderedBy: KProperty1<Position, Int>) {
     fun findIntersections(mapObject: IMapObject, previousPosition: Int, newPosition: Int): Array<IMapObject> {
         val min = min(previousPosition, newPosition)
         val max = max(previousPosition, newPosition)
-        var foundIndex = objects.binarySearchBy(min) { orderedBy.getter.call(it.position) }
-        if (foundIndex < 0) foundIndex = -(foundIndex + 1)
+        var foundIndex = searchLowerBound(objects, min, { orderedBy.getter.call(it.position) })
         var indicesToCheckIntersectionWith = getFoundIndices(foundIndex, max)
         if (newPosition < previousPosition) indicesToCheckIntersectionWith.reverse()
         var result = arrayOf<IMapObject>()

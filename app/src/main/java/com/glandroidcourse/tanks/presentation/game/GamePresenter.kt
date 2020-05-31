@@ -23,7 +23,7 @@ class GamePresenter : MvpPresenter<IGameFragment> {
     var color = Color.DKGRAY
 
     fun onStateChanged(state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) {
-        println(state)
+        // println(state)
         viewState.onStateChanged(state)
     }
 

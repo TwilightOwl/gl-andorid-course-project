@@ -51,16 +51,17 @@ class Map {
         mapOfOrderedList[Position::right]!!.update(mapObjectId)
     }
 
-    fun createTankMapObject(id: Int, name: String, player: IInteractable): IMovableMapObject {
+    fun createTankMapObject(id: Int, player: IInteractable, name: String, position: Position): IMovableMapObject {
         //TODO: передавать через параметры или расставлять в определенных местах
-        val initialLeft = 10 + 30 * id
-        val initialBottom = 10 + 30 * id
+        //val initialLeft = 10 + 30 * id
+        //val initialBottom = 10 + 30 * id
         val tankObject = TankObject(name)
         val tank: IMovableMapObject = MovableMapObject(
             id,
             player,
             tankObject,
-            Position(initialBottom + tankObject.height, initialBottom, initialLeft, initialLeft + tankObject.width),
+            // Position(initialBottom + tankObject.height - 1, initialBottom, initialLeft, initialLeft + tankObject.width - 1),
+            position,
             Direction.UP
         )
         addMapObject(tank)
@@ -72,6 +73,13 @@ class Map {
         val wall: MapObject = MapObject(id, wall, wallObject, position)
         addMapObject(wall)
         return wall
+    }
+
+    fun createBonusMapObject(id: Int, bonus: IInteractable, type: BonusType, position: Position): IMapObject {
+        val bonusObject = BonusObject(type)
+        val bonus: MapObject = MapObject(id, bonus, bonusObject, position)
+        addMapObject(bonus)
+        return bonus
     }
 
     fun createBulletMapObject(id: Int, bulletType: BulletType, bullet: IInteractable, tankMapObject: IMovableMapObject): IMovableMapObject {
@@ -142,12 +150,15 @@ class Map {
                 val newPosition = subjectEdge.getter.call(trajectory.position)
                 val intersectedObjects = mapOfOrderedList[objectEdge]!!.findIntersections(trajectory, previousPosition, newPosition)
                 // находим ближайший (первый же) упор об стену или танк (nearestSolidObject), и двигаемся только до него (nearestSolidEdge +/- 1)
+                println("$newPosition  ${intersectedObjects.size}")
                 var nearestSolidEdge: Int? = null
                 var stepToNearestSolidEdge: Int? = null
                 for (intersectedObject in intersectedObjects) {
                     if (intersectedObject.type is WallObject || intersectedObject.type is TankObject) {
                         nearestSolidEdge = objectEdge.getter.call(intersectedObject.position)
                         stepToNearestSolidEdge = nearestSolidEdge - previousPosition
+                        // println(stepToNearestSolidEdge)
+                        stepToNearestSolidEdge += stepToNearestSolidEdge.sign * -1
                         subject.move(direction, abs(stepToNearestSolidEdge))
                         updateMapObject(tankMapObjectId)
                         break
