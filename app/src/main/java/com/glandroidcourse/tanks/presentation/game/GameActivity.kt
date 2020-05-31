@@ -9,8 +9,6 @@ import com.glandroidcourse.tanks.game.engine.GameProcess
 
 class GameActivity : BaseActivity() {
 
-    var game = GameProcess()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
          setContentView(R.layout.activity_container)

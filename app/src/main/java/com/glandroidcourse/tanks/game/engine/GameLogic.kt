@@ -167,10 +167,10 @@ class GameLogic {
 
     }
 
-    fun nextGameTick(currentTime: Long, deltaTime: Long, actionsByPlayer: Map<Int, List<ControllerAction>>) {
+    fun nextGameTick(currentTime: Long, deltaTime: Long, actionsByPlayer: Map<Int, CurrentControllers>) {
         for (player in players) {
-            val actions = actionsByPlayer[player.id]!!
-            val motionAction: ControllerMotion? = actions.find { it is ControllerMotion } as ControllerMotion?
+            val motionAction = actionsByPlayer[player.id]!!.motion
+            // val motionAction: ControllerMotion? = actions.find { it is ControllerMotion } as ControllerMotion?
             val mapAction: Action? = player.processMotion(currentTime, deltaTime, motionAction)
             if (mapAction != null) {
                 // interactions inside!!!
@@ -178,8 +178,8 @@ class GameLogic {
             }
         }
         for (player in players) {
-            val actions = actionsByPlayer[player.id]!!
-            val fireAction: ControllerFire? = actions.find { it is ControllerFire } as ControllerFire?
+            val fireAction = actionsByPlayer[player.id]!!.fire
+            //val fireAction: ControllerFire? = actions.find { it is ControllerFire } as ControllerFire?
             if (fireAction != null) {
                 // Просто насоздаем пулек, действий на карте не требуется пока
                 player.fire()

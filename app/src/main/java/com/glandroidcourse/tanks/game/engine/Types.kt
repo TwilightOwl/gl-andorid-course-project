@@ -11,6 +11,8 @@ sealed class ControllerAction
 data class ControllerMotion(val direction: Direction) : ControllerAction()
 object ControllerFire : ControllerAction()
 
+data class CurrentControllers(var motion: ControllerMotion?, var fire: ControllerFire?) {}
+
 abstract class Interactable : IInteractable {
     abstract override fun interactWith(interactableObject: IInteractable, currentTime: Long)
 }
@@ -50,14 +52,14 @@ interface IMoving : IGameObject {
             return Motion(direction, step)
         } else {
             stop()
-            rotate(direction)
+            //rotate(direction)
             return Rotation(direction)
         }
     }
     fun stop() {
         speed = 0f
     }
-    private fun rotate(direction: Direction) {
+    fun rotate(direction: Direction) {
         if (this is IDamageable && this.isDead()) {
             return
         }

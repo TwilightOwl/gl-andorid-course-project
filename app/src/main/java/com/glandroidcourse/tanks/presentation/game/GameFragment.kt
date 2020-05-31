@@ -2,18 +2,15 @@ package com.glandroidcourse.tanks.presentation.game
 
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.SurfaceView
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.FrameLayout
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.arellomobile.mvp.presenter.ProvidePresenter
 import com.glandroidcourse.tanks.App
 import com.glandroidcourse.tanks.R
 import com.glandroidcourse.tanks.base.ABaseFragment
-import com.glandroidcourse.tanks.game.engine.GameObjectName
-import com.glandroidcourse.tanks.game.engine.IGameObject
+import com.glandroidcourse.tanks.game.engine.*
+import com.glandroidcourse.tanks.game.engine.map.Direction
 import com.glandroidcourse.tanks.game.engine.map.Position
 import kotlinx.android.synthetic.main.fragment_game.*
 
@@ -59,18 +56,51 @@ class GameFragment: ABaseFragment(), IGameFragment {
         super.onViewCreated(view, savedInstanceState)
         gameView = GameView(requireContext(), presenter)
         gameFieldFrameLayout.addView(gameView)
-        btnDown.setOnClickListener(View.OnClickListener { presenter.goDown() })
-        btnUp.setOnClickListener(View.OnClickListener { presenter.goUp() })
-        btnRight.setOnClickListener(View.OnClickListener { presenter.goRight() })
-        btnLeft.setOnClickListener(View.OnClickListener { presenter.goLeft() })
-        btnFire.setOnClickListener(View.OnClickListener { presenter.fire() })
-        btnStart.setOnClickListener({ presenter.start() })
 
-//        btnLeft.setOnTouchListener({
-//            println("c")
-//            return true
-//        })
+        // btnStart.setOnClickListener({ presenter.start() })
+        btnFire.setOnClickListener(View.OnClickListener { presenter.fire() })
+
+        btnDown.setOnClickListener(View.OnClickListener { presenter.goDown() })
+        btnDown.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                if (event?.action == MotionEvent.ACTION_MOVE) {
+                    presenter.goDown()
+                }
+                return v?.onTouchEvent(event) ?: true
+            }
+        })
+
+        btnUp.setOnClickListener(View.OnClickListener { presenter.goUp() })
+        btnUp.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                if (event?.action == MotionEvent.ACTION_MOVE) {
+                    presenter.goUp()
+                }
+                return v?.onTouchEvent(event) ?: true
+            }
+        })
+
+        btnRight.setOnClickListener(View.OnClickListener { presenter.goRight() })
+        btnRight.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                if (event?.action == MotionEvent.ACTION_MOVE) {
+                    presenter.goRight()
+                }
+                return v?.onTouchEvent(event) ?: true
+            }
+        })
+
+        btnLeft.setOnClickListener(View.OnClickListener {})
+        btnLeft.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                if (event?.action == MotionEvent.ACTION_MOVE) {
+                    presenter.goLeft()
+                }
+                return v?.onTouchEvent(event) ?: true
+            }
+        })
     }
+
 
     override fun onStateChanged(state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) {
         if (gameView != null) {

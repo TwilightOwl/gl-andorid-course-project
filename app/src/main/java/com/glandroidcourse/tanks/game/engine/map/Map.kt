@@ -1,6 +1,8 @@
 package com.glandroidcourse.tanks.game.engine.map
 
 import com.glandroidcourse.tanks.game.engine.IBullet
+import com.glandroidcourse.tanks.game.engine.IMoving
+import com.glandroidcourse.tanks.game.engine.IPlayer
 import kotlin.math.abs
 import kotlin.math.sign
 
@@ -150,7 +152,7 @@ class Map {
                 val newPosition = subjectEdge.getter.call(trajectory.position)
                 val intersectedObjects = mapOfOrderedList[objectEdge]!!.findIntersections(trajectory, previousPosition, newPosition)
                 // находим ближайший (первый же) упор об стену или танк (nearestSolidObject), и двигаемся только до него (nearestSolidEdge +/- 1)
-                println("$newPosition  ${intersectedObjects.size}")
+                //println("$newPosition  ${intersectedObjects.size}")
                 var nearestSolidEdge: Int? = null
                 var stepToNearestSolidEdge: Int? = null
                 for (intersectedObject in intersectedObjects) {
@@ -222,9 +224,11 @@ class Map {
                 if (intersectedObjects == null) {
                     // just rotate
                     subject.rotate(direction)
+                    (subject.gameObject as IMoving).rotate(direction)
                     updateMapObject(tankMapObjectId)
                 } else {
                     subject.rotate(direction)
+                    (subject.gameObject as IMoving).rotate(direction)
                     updateMapObject(tankMapObjectId)
                     for (intersectedObject in intersectedObjects) {
                         subject.gameObject.interactWith(intersectedObject.gameObject, currentTime)

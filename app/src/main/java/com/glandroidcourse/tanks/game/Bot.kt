@@ -1,23 +1,17 @@
-package com.glandroidcourse.tanks.presentation.game
+package com.glandroidcourse.tanks.game
 
-import android.graphics.Color
-import com.arellomobile.mvp.InjectViewState
-import com.arellomobile.mvp.MvpPresenter
-import com.glandroidcourse.tanks.game.NetworkGame
-import com.glandroidcourse.tanks.game.engine.*
+import com.glandroidcourse.tanks.game.engine.ControllerMotion
+import com.glandroidcourse.tanks.game.engine.GameObjectName
+import com.glandroidcourse.tanks.game.engine.IGameObject
 import com.glandroidcourse.tanks.game.engine.map.Direction
 import com.glandroidcourse.tanks.game.engine.map.Position
-import com.glandroidcourse.tanks.game.networkGame
-import javax.inject.Inject
-import kotlin.concurrent.thread
+import kotlin.random.Random
 
-@InjectViewState
-class GamePresenter : MvpPresenter<IGameFragment> {
+class Bot(val playerId: Int) {
 
-    @Inject
-    constructor()
-
-    val playerId = 0
+    var fireCounter = 0
+    var motionCounter = 0
+    var go: () -> Unit = { goUp() }
 
     init {
         // networkGame.onStateChangedListener = { state -> onStateChanged(state) }
@@ -25,7 +19,16 @@ class GamePresenter : MvpPresenter<IGameFragment> {
     }
 
     fun onStateChanged(state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) {
-        viewState.onStateChanged(state)
+        if (fireCounter++ % 10 == 0) fire()
+        if (motionCounter++ % 30 == 0) {
+            go = when (Random.nextInt(4)) {
+                0 -> ({ goDown() })
+                1 -> ({ goUp() })
+                2 -> ({ goLeft() })
+                else -> ({ goRight() })
+            }
+        }
+        go()
     }
 
     fun goUp() { networkGame.sendMotionAction(playerId, ControllerMotion(Direction.DOWN)) }
@@ -33,5 +36,4 @@ class GamePresenter : MvpPresenter<IGameFragment> {
     fun goRight() { networkGame.sendMotionAction(playerId, ControllerMotion(Direction.RIGHT)) }
     fun goLeft() { networkGame.sendMotionAction(playerId, ControllerMotion(Direction.LEFT)) }
     fun fire() { networkGame.sendFireAction(playerId) }
-
 }

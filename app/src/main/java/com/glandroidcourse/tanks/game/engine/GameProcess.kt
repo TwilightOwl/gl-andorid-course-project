@@ -4,28 +4,46 @@ import com.glandroidcourse.tanks.game.engine.map.Direction
 import com.glandroidcourse.tanks.game.engine.map.Position
 import kotlinx.coroutines.delay
 
-
-class GameProcess {
+class GameProcess(val playerCount: Int) {
 
     val game = GameLogic()
 
-    var TEMPDirection: Direction? = null // Direction.RIGHT
-    var firePressed = false
+    val actionsByPlayer: MutableMap<Int, CurrentControllers>
 
-    fun goUp() { TEMPDirection = Direction.UP }
-    fun goDown() { TEMPDirection = Direction.DOWN }
-    fun goLeft() { TEMPDirection = Direction.LEFT }
-    fun goRight() { TEMPDirection = Direction.RIGHT }
-    fun fire() { firePressed = true }
-    fun stop() { TEMPDirection = null }
+    init {
+        actionsByPlayer = mutableMapOf()
+        clearActions()
+    }
+
+    fun clearActions() {
+        repeat(playerCount) {
+            actionsByPlayer[it] = CurrentControllers(null, null)
+        }
+    }
+
+    //var TEMPDirection: Direction? = null // Direction.RIGHT
+    //var firePressed = false
+
+    fun goLeft() { incomingActions(0, motionAction = ControllerMotion(Direction.LEFT)) }
+    fun goRight() { incomingActions(0, motionAction = ControllerMotion(Direction.RIGHT)) }
+    fun goUp() { incomingActions(0, motionAction = ControllerMotion(Direction.UP)) }
+    fun goDown() { incomingActions(0, motionAction = ControllerMotion(Direction.DOWN)) }
+    fun fire() { incomingActions(0, fireAction = ControllerFire ) }
+
+    // fun fire() { firePressed = true }
+    //fun stop() { TEMPDirection = null }
+
+    fun incomingActions(playerId: Int, motionAction: ControllerMotion? = null, fireAction: ControllerFire? = null) {
+        println("$motionAction  $fireAction")
+        motionAction?.let {actionsByPlayer[playerId]!!.motion = it}
+        fireAction?.let {actionsByPlayer[playerId]!!.fire = it}
+    }
 
     fun process(onStateChanged: (state: Map<GameObjectName, List<Pair<IGameObject, Position>>>) -> Unit) {
         var stop = false
         // val players = listOf<IPlayer>() // TODO
 
-
-        game.initWorld(4)
-
+        game.initWorld(playerCount)
 
         var lastTime: Long = System.currentTimeMillis()
 
@@ -37,26 +55,22 @@ class GameProcess {
             val deltaTime = currentTime - lastTime
             lastTime = currentTime
 
-            val actionsByPlayer = mutableMapOf<Int, List<ControllerAction>>() //TODO
-
-//            i++
-//            if (i == 2) {
-//                firePressed = true
+            //val actionsByPlayer = mutableMapOf<Int, List<ControllerAction>>() //TODO
+//
+//            val actions =
+//                TEMPDirection?.let { mutableListOf<ControllerAction>(ControllerMotion(it)) } ?: mutableListOf()
+//            if (firePressed) {
+//                actions.add(ControllerFire)
+//                firePressed = false
 //            }
-
-            val actions =
-                TEMPDirection?.let { mutableListOf<ControllerAction>(ControllerMotion(it)) } ?: mutableListOf()
-            if (firePressed) {
-                actions.add(ControllerFire)
-                firePressed = false
-            }
-
-            actionsByPlayer[0] = actions
-            actionsByPlayer[1] = mutableListOf()
-            actionsByPlayer[2] = mutableListOf()
-            actionsByPlayer[3] = mutableListOf()
+//
+//            actionsByPlayer[0] = actions
+//            actionsByPlayer[1] = mutableListOf()
+//            actionsByPlayer[2] = mutableListOf()
+//            actionsByPlayer[3] = mutableListOf()
 
             game.nextGameTick(currentTime, deltaTime, actionsByPlayer)
+            clearActions()
             val state = game.getCurrentState()
             onStateChanged(state)
 //
