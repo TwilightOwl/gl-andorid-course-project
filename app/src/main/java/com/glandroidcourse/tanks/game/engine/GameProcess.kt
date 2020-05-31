@@ -34,7 +34,7 @@ class GameProcess(val playerCount: Int) {
     //fun stop() { TEMPDirection = null }
 
     fun incomingActions(playerId: Int, motionAction: ControllerMotion? = null, fireAction: ControllerFire? = null) {
-        println("$motionAction  $fireAction")
+        // println("$motionAction  $fireAction")
         motionAction?.let {actionsByPlayer[playerId]!!.motion = it}
         fireAction?.let {actionsByPlayer[playerId]!!.fire = it}
     }
